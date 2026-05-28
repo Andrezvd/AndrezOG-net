@@ -135,6 +135,21 @@ Cuando trabajes en un stack:
 
 ---
 
+# Reglas de comportamiento para agentes IA
+
+Este proyecto tiene un **propósito principal de aprendizaje**.
+
+Todo agente IA que interactúe con este repositorio **debe leer y cumplir** las reglas definidas en `AGENTS.md` (ubicado en la raíz de este workspace).
+
+Las reglas incluyen:
+
+* Enfoque enseñanza → práctica (no resolver por ti)
+* PROHIBIDO implementar módulos completos sin autorización explícita
+* Formato didáctico obligatorio (explicar antes de codificar)
+* Tú tienes el control del ritmo y las decisiones
+
+---
+
 # Filosofía del proyecto
 
 El usuario debe percibir:
