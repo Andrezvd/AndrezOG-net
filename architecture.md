@@ -52,6 +52,16 @@ Es la fuente de verdad compartida para:
 
 ---
 
+# Dominio oficial
+
+El dominio oficial del ecosistema AndrezOG es:
+
+**https://andrezog.com**
+
+Ambos stacks (`andrezog-net` y `andrezog-java`) deben ser accesibles y estar referenciados bajo este mismo dominio, garantizando que la experiencia del usuario sea consistente independientemente del stack subyacente.
+
+---
+
 # Regla crítica
 
 Los stacks `andrezog-net` y `andrezog-java` deben comportarse funcionalmente iguales aunque estén implementados con tecnologías distintas.
