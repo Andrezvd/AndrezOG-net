@@ -2,7 +2,7 @@ namespace AndrezOG.Infrastructure.ContextDb.Configuration;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using AndrezOG.Domain.Model;
+using AndrezOG.Domain.Model.Skills;
 
 public class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {

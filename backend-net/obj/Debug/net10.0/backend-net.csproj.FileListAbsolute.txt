@@ -121,3 +121,14 @@ C:\Users\andre\Desktop\andrezog-net\backend-net\obj\Debug\net10.0\refint\backend
 C:\Users\andre\Desktop\andrezog-net\backend-net\obj\Debug\net10.0\backend-net.pdb
 C:\Users\andre\Desktop\andrezog-net\backend-net\obj\Debug\net10.0\backend-net.genruntimeconfig.cache
 C:\Users\andre\Desktop\andrezog-net\backend-net\obj\Debug\net10.0\ref\backend-net.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\BCrypt-Net-Next.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\DotNetEnv.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\Superpower.dll
+C:\Users\andre\Desktop\andrezog-net\backend-net\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll

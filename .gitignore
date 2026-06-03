@@ -1,3 +1,5 @@
 # VARIABLES
 .env
+
+# composer variables
 docker-compose.yml

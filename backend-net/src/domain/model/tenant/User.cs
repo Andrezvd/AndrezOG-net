@@ -1,4 +1,4 @@
-namespace AndrezOG.Domain.Model;
+namespace AndrezOG.Domain.Model.Tenant;
 
 public class User
 {
@@ -9,4 +9,8 @@ public class User
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
     public UserRole Role { get; set; } = UserRole.Client;
+    public string? GoogleId { get; set; }
+    public string? PhoneNumber { get; set; }
+    public bool TwoFactorEnabled { get; set; }
+    public string? TwoFactorSecret { get; set; }
 }

@@ -1,7 +1,7 @@
 namespace AndrezOG.Infrastructure.ContextDb.Configuration;
 
 using Microsoft.EntityFrameworkCore;
-using AndrezOG.Domain.Model;
+using AndrezOG.Domain.Model.Tenant;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class ProfileConfiguration : IEntityTypeConfiguration<Profile>

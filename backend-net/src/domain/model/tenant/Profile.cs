@@ -1,4 +1,4 @@
-namespace AndrezOG.Domain.Model;
+namespace AndrezOG.Domain.Model.Tenant;
 
 public class Profile
 {

@@ -1,6 +1,10 @@
 namespace AndrezOG.Infrastructure.ContextDb;
 
-using AndrezOG.Domain.Model;
+using AndrezOG.Domain.Model.Contact;
+using AndrezOG.Domain.Model.Tenant;
+using AndrezOG.Domain.Model.Room;
+using AndrezOG.Domain.Model.Skills;
+using AndrezOG.Domain.Model.StackProject;
 using Microsoft.EntityFrameworkCore;
 public class AppDbContext : DbContext
 {
