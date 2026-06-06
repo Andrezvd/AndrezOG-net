@@ -11,6 +11,7 @@ public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
         entity.ToTable("profiles");
         entity.HasKey(e => e.IdUser);
         entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+        entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
         entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
         entity.Property(e => e.Summary).HasMaxLength(500);
         entity.Property(e => e.Education).HasMaxLength(200);

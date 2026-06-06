@@ -1,5 +1,4 @@
 # VARIABLES
-.env
-
+appsettings.Development.json
 # composer variables
-docker-compose.yml
+docker-compose.local.yml

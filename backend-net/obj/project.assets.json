@@ -11,18 +11,6 @@
           "lib/net10.0/BCrypt-Net-Next.dll": {}
         }
       },
-      "DotNetEnv/3.2.0": {
-        "type": "package",
-        "dependencies": {
-          "Superpower": "3.0.0"
-        },
-        "compile": {
-          "lib/netstandard2.0/DotNetEnv.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/DotNetEnv.dll": {}
-        }
-      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -677,18 +665,21 @@
           }
         }
       },
-      "Superpower/3.0.0": {
+      "Scalar.AspNetCore/2.14.14": {
         "type": "package",
         "compile": {
-          "lib/net5.0/Superpower.dll": {
+          "lib/net10.0/Scalar.AspNetCore.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net5.0/Superpower.dll": {
+          "lib/net10.0/Scalar.AspNetCore.dll": {
             "related": ".xml"
           }
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "System.CodeDom/6.0.0": {
         "type": "package",
@@ -859,20 +850,6 @@
         "lib/netstandard2.1/BCrypt-Net-Next.dll",
         "lib/netstandard2.1/BCrypt.Net-Next.xml",
         "readme.md"
-      ]
-    },
-    "DotNetEnv/3.2.0": {
-      "sha512": "2q+PD+aJcRW9QuRcIv4F8WbvEDxI6cwxzZJec2i45cBY4cAKCAoW4ZPkApJ7H82wr6Yfmxx/0kb1nLnRmZrGZA==",
-      "type": "package",
-      "path": "dotnetenv/3.2.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE",
-        "README.md",
-        "dotnetenv.3.2.0.nupkg.sha512",
-        "dotnetenv.nuspec",
-        "lib/netstandard2.0/DotNetEnv.dll"
       ]
     },
     "Humanizer.Core/2.14.1": {
@@ -2368,20 +2345,23 @@
         "postgresql.png"
       ]
     },
-    "Superpower/3.0.0": {
-      "sha512": "bjKbAYWePooCAvPxQq+3KnmcLfRggMyRoXmtBMlmCG71bdwBHrO6rmRJ2DRIodg5aztNcxeZXBUVWT+H+MZUhw==",
+    "Scalar.AspNetCore/2.14.14": {
+      "sha512": "xNa3MadDudKk7y+0gQPBQihVL+JxGP3KNZHB4Zl2W42ATFIffHHHBjsuyKJ4YPUnnA7NUiHR/diqV/FTZC9dkg==",
       "type": "package",
-      "path": "superpower/3.0.0",
+      "path": "scalar.aspnetcore/2.14.14",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Superpower-White-400px.png",
-        "lib/net5.0/Superpower.dll",
-        "lib/net5.0/Superpower.xml",
-        "lib/netstandard2.0/Superpower.dll",
-        "lib/netstandard2.0/Superpower.xml",
-        "superpower.3.0.0.nupkg.sha512",
-        "superpower.nuspec"
+        "README.md",
+        "icon.png",
+        "lib/net10.0/Scalar.AspNetCore.dll",
+        "lib/net10.0/Scalar.AspNetCore.xml",
+        "lib/net8.0/Scalar.AspNetCore.dll",
+        "lib/net8.0/Scalar.AspNetCore.xml",
+        "lib/net9.0/Scalar.AspNetCore.dll",
+        "lib/net9.0/Scalar.AspNetCore.xml",
+        "scalar.aspnetcore.2.14.14.nupkg.sha512",
+        "scalar.aspnetcore.nuspec"
       ]
     },
     "System.CodeDom/6.0.0": {
@@ -2597,11 +2577,11 @@
   "projectFileDependencyGroups": {
     "net10.0": [
       "BCrypt.Net-Next >= 4.2.0",
-      "DotNetEnv >= 3.2.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.8",
       "Microsoft.AspNetCore.OpenApi >= 10.0.8",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.8",
-      "Npgsql.EntityFrameworkCore.PostgreSQL >= 10.0.2"
+      "Npgsql.EntityFrameworkCore.PostgreSQL >= 10.0.2",
+      "Scalar.AspNetCore >= 2.14.14"
     ]
   },
   "packageFolders": {
@@ -2660,10 +2640,6 @@
             "target": "Package",
             "version": "[4.2.0, )"
           },
-          "DotNetEnv": {
-            "target": "Package",
-            "version": "[3.2.0, )"
-          },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
             "version": "[10.0.8, )"
@@ -2681,6 +2657,10 @@
           "Npgsql.EntityFrameworkCore.PostgreSQL": {
             "target": "Package",
             "version": "[10.0.2, )"
+          },
+          "Scalar.AspNetCore": {
+            "target": "Package",
+            "version": "[2.14.14, )"
           }
         },
         "imports": [

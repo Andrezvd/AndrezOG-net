@@ -8,39 +8,40 @@ using AndrezOG.Infrastructure.Repository;
 using AndrezOG.Application;
 using AndrezOG.Application.Iservices;
 using AndrezOG.Domain.Irepository;
-using DotNetEnv;
+using Scalar.AspNetCore;
 
-
-Env.Load("../.env.local");
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+// CORS: permitir requests desde el frontend React en desarrollo (Vite: localhost:5173)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
-var connectionString = string.Format(
-    "Host={0};Port={1};Database={2};Username={3};Password={4}",
-    Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost",
-    Environment.GetEnvironmentVariable("DB_PORT") ?? "5432",
-    Environment.GetEnvironmentVariable("DB_NAME") ?? "andrezog",
-    Environment.GetEnvironmentVariable("DB_USER") ?? "postgres",
-    Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "postgres"
-);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Repositorios
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 
 // Servicios
-
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 // configuracion JWT
-var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
-    ?? builder.Configuration["Jwt:Key"]
-    ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -53,7 +54,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "AndrezOG",
-            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "AndrezOG-App",
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "AndrezOG-Client",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
@@ -67,8 +68,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
-
+// Permitir react mediante cors
+app.UseCors("AllowReactDev");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

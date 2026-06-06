@@ -1,10 +1,10 @@
 namespace AndrezOG.Application;
 
+using AndrezOG.Application.Commands;
 using AndrezOG.Application.Iservices;
 using AndrezOG.Application.Result;
 using AndrezOG.Domain.Irepository;
 using AndrezOG.Domain.Model.Tenant;
-using AndrezOG.Api.Rest.Dto.Auth;
 
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,10 +22,9 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<AuthResult> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResult> RegisterAsync(RegisterCommand command)
     {
-        // Devolvemos error si el correo ya existe
-        if (await _repository.EmailExistsAsync(request.Email))
+        if (await _repository.EmailExistsAsync(command.Email))
         {
             return new AuthResult
             {
@@ -34,35 +33,32 @@ public class AuthService : IAuthService
             };
         }
 
-        // Creamos el usuario si el correo no existe
         var user = new User
         {
-            Email = request.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Email = command.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Password),
             Role = UserRole.Client,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
-        // Persistimos el usuario en la base de datos
         await _repository.CreateAsync(user);
 
-        // Generamos el token JWT para el usuario registrado
         var token = GenerateJwtToken(user);
         return new AuthResult
         {
             Success = true,
             Message = "Usuario registrado exitosamente",
+            UserId = user.Id,
             Token = token,
             Email = user.Email,
             Role = user.Role.ToString()
         };
     }
 
-    public async Task<AuthResult> LoginAsync(LoginRequest request)
+    public async Task<AuthResult> LoginAsync(LoginCommand command)
     {
-        // Buscamos el usuario por correo electrónico
-        var user = await _repository.GetByEmailAsync(request.Email);
+        var user = await _repository.GetByEmailAsync(command.Email);
 
         if (user == null)
         {
@@ -73,8 +69,7 @@ public class AuthService : IAuthService
             };
         }
 
-        // Verificamos la contraseña
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (!BCrypt.Net.BCrypt.Verify(command.Password, user.PasswordHash))
         {
             return new AuthResult
             {
@@ -83,12 +78,12 @@ public class AuthService : IAuthService
             };
         }
 
-        // Generamos el token JWT para el usuario autenticado
         var token = GenerateJwtToken(user);
         return new AuthResult
         {
             Success = true,
             Message = "Usuario autenticado exitosamente",
+            UserId = user.Id,
             Token = token,
             Email = user.Email,
             Role = user.Role.ToString()
@@ -97,9 +92,7 @@ public class AuthService : IAuthService
 
     private string GenerateJwtToken(User user)
     {
-        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
-            ?? _configuration["Jwt:Key"]
-            ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
+        var jwtKey = _configuration["Jwt:Key"] ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -113,13 +106,12 @@ public class AuthService : IAuthService
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"] ?? "AndrezOG",
-            audience: _configuration["Jwt:Audience"] ?? "AndrezOG-App",
+            audience: _configuration["Jwt:Audience"] ?? "AndrezOG-Client",
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "60")),
             signingCredentials: credentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
 }
