@@ -14,9 +14,9 @@ public class Profile
     public string? Summary { get; set; }
     public bool Available { get; set; }
     public string? AvailableText { get; set; }
-    public string Education { get; set; } = string.Empty;
-    public string EducationStartYear { get; set; } = string.Empty;
-    public string EducationEndYear { get; set; } = string.Empty;
+    public string? Education { get; set; } = string.Empty;
+    public string? EducationStartYear { get; set; } = string.Empty;
+    public string? EducationEndYear { get; set; } = string.Empty;
     public string? PhotoUrl { get; set; }
     public string? VideoUrl { get; set; }
     public string? Email { get; set; }

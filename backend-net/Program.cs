@@ -15,12 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-// CORS: permitir requests desde el frontend React en desarrollo (Vite: localhost:5173)
+// CORS: permitir requests desde los frontends React (5173) y Angular (4200) en desarrollo
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactDev", policy =>
+    options.AddPolicy("AllowFrontendDev", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -70,8 +70,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-// Permitir react mediante cors
-app.UseCors("AllowReactDev");
+// Permitir frontends mediante CORS
+app.UseCors("AllowFrontendDev");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
