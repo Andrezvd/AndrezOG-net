@@ -4,6 +4,7 @@ using AndrezOG.Application.Commands;
 using AndrezOG.Application.Iservices;
 using AndrezOG.Api.Rest.Dto.Auth;
 using AndrezOG.Api.Rest.Mapper.Auth;
+using AndrezOG.Infrastructure.ContextDb;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +14,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IProfileService _profileService;
+    private readonly AppDbContext _context;
 
-    public AuthController(IAuthService authService, IProfileService profileService)
+    public AuthController(IAuthService authService, IProfileService profileService, AppDbContext context)
     {
         _authService = authService;
         _profileService = profileService;
+        _context = context;
     }
 
     [HttpPost("register")]
@@ -29,17 +32,32 @@ public class AuthController : ControllerBase
         }
 
         var registerCommand = AuthMappers.ToRegisterCommand(request);
-        var result = await _authService.RegisterAsync(registerCommand);
 
-        if (!result.Success)
+        // Envolver registro de usuario + creación de perfil en una transacción
+        // Si cualquiera de las dos falla, se hace rollback automático
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
         {
-            return BadRequest(AuthMappers.ToErrorResponse(result));
+            var result = await _authService.RegisterAsync(registerCommand);
+
+            if (!result.Success)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(AuthMappers.ToErrorResponse(result));
+            }
+
+            var profileCommand = AuthMappers.ToCreateDefaultProfileCommand(request, result.UserId!.Value);
+            await _profileService.CreateDefaultProfileAsync(profileCommand);
+
+            await transaction.CommitAsync();
+            return Ok(AuthMappers.ToAuthResponse(result));
         }
-
-        var profileCommand = AuthMappers.ToCreateDefaultProfileCommand(request, result.UserId!.Value);
-        await _profileService.CreateDefaultProfileAsync(profileCommand);
-
-        return Ok(AuthMappers.ToAuthResponse(result));
+        catch
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, new ErrorResponse("Error al crear el perfil. El registro fue cancelado."));
+        }
     }
 
     [HttpPost("login")]

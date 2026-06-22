@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { RegisterRequest } from '../types/auth.types';
 import { registerUser } from '../api/authApi';
@@ -21,7 +21,7 @@ export function useRegister() {
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
 

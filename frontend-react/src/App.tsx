@@ -9,16 +9,8 @@ function App() {
 
   return (
     <>
-      {/* Video de fondo — fixed para que ocupe todo el viewport sin estirarse con el scroll */}
-      <div className="container-video">
-        <video autoPlay muted loop className="video-fondo">
-          <source src="/videoFondo.mp4" type="video/mp4" />
-        </video>
-      </div>
-
       <main className="landing-shell">
-        <div className="landing-backdrop" />
-
+        <div className="landing-backdrop"/>
         <header className="landing-nav">
           <Link to="/" className="auth-logo">AndrezOG</Link>
 
@@ -41,18 +33,78 @@ function App() {
           </div>
         </header>
 
-        <section className="hero-section">
-          <p className="eyebrow">{profile?.title ?? 'System Engineer / Game Dev / FullStack Developer'}</p>
-          <h1>Hi, I'm {profile?.name ?? 'Andrés Olivar'}</h1>
-          <p className="hero-copy">{profile?.summary ?? 'Welcome to my world'}</p>
+        <section className="hero-grid-section">
+          <div className="hero-grid">
 
-          <div className="hero-actions">
-            <Link to="/register" className="primary-action">
-              Get in Touch
-            </Link>
-            <a className="secondary-action" href="#about">
-              Explore more
-            </a>
+            {/* ===== COLUMNA IZQUIERDA ===== */}
+            <div className="hero-left">
+
+              {/* Foto circular */}
+              {profile?.photoUrl ? (
+                <img
+                  src={profile.photoUrl}
+                  alt={profile.name}
+                  className="hero-avatar"
+                />
+              ) : (
+                <div className="hero-avatar-fallback">
+                  {profile?.name?.charAt(0)}{profile?.lastName?.charAt(0)}
+                </div>
+              )}
+
+              {/* Datos de contacto */}
+              <div className="hero-contact">
+                {profile?.phoneNumber && <p>📞 {profile.phoneNumber}</p>}
+                {profile?.email && <p>📧 {profile.email}</p>}
+                {profile?.gitHubUrl && (
+                  <a href={profile.gitHubUrl} target="_blank" rel="noopener noreferrer">
+                    🔗 GitHub
+                  </a>
+                )}
+                {profile?.linkedInUrl && (
+                  <a href={profile.linkedInUrl} target="_blank" rel="noopener noreferrer">
+                    🔗 LinkedIn
+                  </a>
+                )}
+                {profile?.education && (
+                  <p>🎓 {profile.education} ({profile.educationStartYear} - {profile.educationEndYear})</p>
+                )}
+                <p className="hero-available">
+                  <span className={`dot-available ${profile?.available ? 'dot-green' : 'dot-red'}`} />
+                  {profile?.availableText}
+                </p>
+              </div>
+
+              {/* Skills (placeholder) */}
+              <div className="hero-skills">
+                <p className="hero-skills-label">Skills</p>
+                <div className="hero-skills-placeholder">Skills coming soon...</div>
+              </div>
+
+            </div>
+
+            {/* ===== COLUMNA DERECHA ===== */}
+            <div className="hero-right">
+
+              {/* Nombre + título */}
+              <div className="hero-name-block">
+                <h1 className="hero-name">
+                  Hola, soy {profile?.name ?? 'Andrés Olivar'} {profile?.lastName ?? ''}
+                </h1>
+                <p className="hero-title">
+                  {profile?.title ?? 'System Engineer / Game Dev / FullStack Developer'}
+                </p>
+              </div>
+
+              {/* Summary */}
+              {profile?.summary && (
+                <div className="hero-summary-box">
+                  <p>{profile.summary}</p>
+                </div>
+              )}
+
+            </div>
+
           </div>
         </section>
 

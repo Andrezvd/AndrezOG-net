@@ -10,12 +10,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         entity.ToTable("users");
         entity.HasKey(e => e.Id);
-        entity.Property(e => e.Id).ValueGeneratedOnAdd();
-        entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
-        entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(200);
-        entity.Property(e => e.CreatedAt).IsRequired();
-        entity.Property(e => e.UpdatedAt).IsRequired();
-        entity.Property(e => e.IsActive).IsRequired();
-        entity.Property(e => e.Role).IsRequired();
+        entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("id");
+        entity.Property(e => e.Email).IsRequired().HasMaxLength(100).HasColumnName("email");
+        entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(200).HasColumnName("password_hash");
+        entity.Property(e => e.Role).IsRequired().HasColumnName("role");
+        entity.Property(e => e.IsActive).IsRequired().HasColumnName("is_active");
+        entity.Property(e => e.CreatedAt).IsRequired().HasColumnName("created_at");
+        entity.Property(e => e.UpdatedAt).IsRequired().HasColumnName("updated_at");
+        entity.Property(e => e.GoogleId).HasColumnName("google_id");
+        entity.Property(e => e.PhoneNumber).HasColumnName("phone_number");
+        entity.Property(e => e.TwoFactorEnabled).IsRequired().HasColumnName("two_factor_enabled");
+        entity.Property(e => e.TwoFactorSecret).HasColumnName("two_factor_secret");
     }
 }

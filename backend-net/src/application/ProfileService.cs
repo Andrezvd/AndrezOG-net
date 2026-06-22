@@ -19,7 +19,10 @@ public class ProfileService : IProfileService
         var profile = new Profile
         {
             IdUser = command.UserId,
-            Name = $"{command.Name} {command.LastName}".Trim(),
+            Name = command.Name,
+            LastName = command.LastName,
+            PhoneNumber = command.PhoneNumber,
+            Country = command.Country,
             Title = string.Empty,
             Education = string.Empty,
             EducationStartYear = string.Empty,

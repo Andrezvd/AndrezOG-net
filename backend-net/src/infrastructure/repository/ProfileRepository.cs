@@ -40,6 +40,6 @@ public class ProfileRepository : IProfileRepository
 
     public async Task<Profile?> GetPublicProfileAsync()
     {
-        return await _context.Profiles.FirstOrDefaultAsync(p => p.IdUser == 1);
+        return await _context.Profiles.FirstOrDefaultAsync(p => p.IdUser == 3);
     }
 }

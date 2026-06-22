@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Skill> Skills { get; set; } = null!;
     public DbSet<Project> Projects { get; set; } = null!;
     public DbSet<Stack> Stacks { get; set; } = null!;
+    public DbSet<StackSkill> StackSkills { get; set; } = null!;
     public DbSet<StackProject> StackProjects { get; set; } = null!;
     public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
 

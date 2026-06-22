@@ -35,6 +35,12 @@ public class AuthRepository : IAuthRepository
         return user;
     }
 
+    public User Add(User user)
+    {
+        _context.Users.Add(user);
+        return user;
+    }
+
     public async Task UpdateAsync(User user)
     {
         _context.Users.Update(user);
