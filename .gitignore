@@ -1,4 +1,4 @@
 # VARIABLES
-appsettings.Development.json
+/backend-net/appsettings.Development.json
 # composer variables
 docker-compose.local.yml

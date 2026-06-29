@@ -13,4 +13,16 @@ public class User
     public string? PhoneNumber { get; set; }
     public bool TwoFactorEnabled { get; set; }
     public string? TwoFactorSecret { get; set; }
+
+    // Refresh token
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpires { get; set; }
+
+    // Account lockout
+    public int FailedAttempts { get; set; }
+    public DateTime? LockoutEnd { get; set; }
+
+    // Email verification
+    public bool EmailVerified { get; set; }
+    public string? EmailVerificationToken { get; set; }
 }

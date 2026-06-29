@@ -28,7 +28,10 @@ public static class AuthMappers
         new(
             result.Message!,
             result.Token!,
+            result.RefreshToken!,
+            result.UserId!.Value,
             result.Email!,
+            result.Name!,
             result.Role!
         );
 
