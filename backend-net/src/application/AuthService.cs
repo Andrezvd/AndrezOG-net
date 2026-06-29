@@ -5,8 +5,10 @@ using AndrezOG.Application.Iservices;
 using AndrezOG.Application.Result;
 using AndrezOG.Domain.Irepository;
 using AndrezOG.Domain.Model.Tenant;
-using AndrezOG.Infrastructure.Auth;
 
+using AndrezOG.Infrastructure.ContextDb;
+using Google.Apis.Auth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,17 +18,20 @@ using System.Text;
 public class AuthService : IAuthService
 {
     private readonly IAuthRepository _repository;
+    private readonly IProfileRepository _profileRepository;
     private readonly IConfiguration _configuration;
-    private readonly GoogleAuthService _googleAuth;
+    private readonly AppDbContext _context;
 
     public AuthService(
         IAuthRepository repository,
+        IProfileRepository profileRepository,
         IConfiguration configuration,
-        GoogleAuthService googleAuth)
+        AppDbContext context)
     {
         _repository = repository;
+        _profileRepository = profileRepository;
         _configuration = configuration;
-        _googleAuth = googleAuth;
+        _context = context;
     }
 
     // ================================================================
@@ -63,6 +68,7 @@ public class AuthService : IAuthService
             Email = command.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Password),
             Role = role,
+            Provider = AuthProvider.Local,
             EmailVerified = false,
             EmailVerificationToken = GenerateVerificationToken(),
             CreatedAt = DateTime.UtcNow,
@@ -86,9 +92,104 @@ public class AuthService : IAuthService
             Email = user.Email,
             Name = string.Empty,
             Role = user.Role.ToString(),
-            Token = token,
-            RefreshToken = refreshToken
+            Token = token
         };
+    }
+
+    /// <summary>
+    /// Registro de usuario + creación de perfil en una transacción atómica.
+    /// Si cualquiera de las dos falla, se hace rollback automático.
+    /// </summary>
+    public async Task<AuthResult> RegisterWithProfileAsync(RegisterCommand userCommand, CreateDefaultProfileCommand profileCommand)
+    {
+        if (!IsPasswordStrong(userCommand.Password))
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Message = "La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial."
+            };
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            if (await _repository.EmailExistsAsync(userCommand.Email))
+            {
+                await transaction.RollbackAsync();
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "El email ya está registrado"
+                };
+            }
+
+            var adminEmails = _configuration.GetSection("AdminEmails").Get<string[]>() ?? Array.Empty<string>();
+            var role = adminEmails.Contains(userCommand.Email, StringComparer.OrdinalIgnoreCase)
+                ? UserRole.Admin
+                : UserRole.Client;
+
+            // 1. Crear usuario
+            var user = new User
+            {
+                Email = userCommand.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userCommand.Password),
+                Role = role,
+                Provider = AuthProvider.Local,
+                EmailVerified = false,
+                EmailVerificationToken = GenerateVerificationToken(),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _repository.CreateAsync(user);
+
+            // 2. Crear perfil por defecto
+            var profile = new Profile
+            {
+                IdUser = user.Id,
+                Name = profileCommand.Name,
+                LastName = profileCommand.LastName,
+                PhoneNumber = profileCommand.PhoneNumber,
+                Country = profileCommand.Country,
+                Title = string.Empty,
+                Education = string.Empty,
+                EducationStartYear = string.Empty,
+                EducationEndYear = string.Empty,
+                Email = profileCommand.Email,
+                Available = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _profileRepository.CreateAsync(profile);
+
+            await transaction.CommitAsync();
+
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
+            await _repository.UpdateAsync(user);
+
+            return new AuthResult
+            {
+                Success = true,
+                Message = "Usuario registrado exitosamente",
+                UserId = user.Id,
+                Email = user.Email,
+                Name = profileCommand.Name,
+                Role = user.Role.ToString(),
+                Token = token
+            };
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     // ================================================================
@@ -143,7 +244,7 @@ public class AuthService : IAuthService
             };
         }
 
-        // Login exitoso: resetear contadores
+        // Login exitoso
         user.FailedAttempts = 0;
         user.LockoutEnd = null;
         user.UpdatedAt = DateTime.UtcNow;
@@ -161,48 +262,58 @@ public class AuthService : IAuthService
             Email = user.Email,
             Name = string.Empty,
             Role = user.Role.ToString(),
-            Token = token,
-            RefreshToken = refreshToken
+            Token = token
         };
     }
 
     // ================================================================
-    // GOOGLE OAUTH LOGIN / REGISTRO
+    // LOGIN EXTERNO (Google, GitHub, etc.)
     // ================================================================
 
-    public async Task<AuthResult> GoogleLoginAsync(GoogleLoginCommand command)
+    public async Task<AuthResult> ExternalLoginAsync(ExternalLoginCommand command)
     {
-        // 1. Intercambiar code por token con Google
-        GoogleTokenResponse tokenResponse;
+        if (!Enum.TryParse<AuthProvider>(command.Provider, ignoreCase: true, out var provider))
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Message = $"Provider no soportado: {command.Provider}"
+            };
+        }
+
+        return provider switch
+        {
+            AuthProvider.Google => await GoogleLoginAsync(command.IdToken),
+            _ => new AuthResult { Success = false, Message = $"Provider no soportado: {command.Provider}" }
+        };
+    }
+
+    private async Task<AuthResult> GoogleLoginAsync(string idToken)
+    {
+        // Validar ID Token de Google (criptográficamente, sin HTTP a Google)
+        GoogleJsonWebSignature.Payload payload;
         try
         {
-            tokenResponse = await _googleAuth.ExchangeCodeAsync(command.Code, command.RedirectUri);
+            var googleClientId = _configuration["Google:ClientId"]
+                ?? throw new InvalidOperationException("Google:ClientId no configurado");
+
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { googleClientId }
+            };
+
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
         }
         catch (Exception ex)
         {
             return new AuthResult
             {
                 Success = false,
-                Message = $"Error al autenticar con Google: {ex.Message}"
+                Message = $"Token de Google inválido o expirado: {ex.Message}"
             };
         }
 
-        // 2. Obtener datos del usuario desde Google
-        GoogleUserInfo userInfo;
-        try
-        {
-            userInfo = await _googleAuth.GetUserInfoAsync(tokenResponse.AccessToken);
-        }
-        catch (Exception ex)
-        {
-            return new AuthResult
-            {
-                Success = false,
-                Message = $"Error al obtener datos de Google: {ex.Message}"
-            };
-        }
-
-        if (!userInfo.EmailVerified)
+        if (!payload.EmailVerified)
         {
             return new AuthResult
             {
@@ -211,16 +322,21 @@ public class AuthService : IAuthService
             };
         }
 
-        // 3. Buscar usuario por GoogleId o Email
-        var user = await _repository.GetByGoogleIdAsync(userInfo.Sub)
-                   ?? await _repository.GetByEmailAsync(userInfo.Email);
+        var googleId = payload.Subject;
+        var email = payload.Email;
+
+        // Buscar usuario por GoogleId primero (inmutable), luego por email
+        var user = await _repository.GetByExternalIdAsync(googleId)
+                   ?? await _repository.GetByEmailAsync(email);
 
         if (user != null)
         {
             // Vincular GoogleId si no lo tiene
-            if (string.IsNullOrEmpty(user.GoogleId))
+            if (string.IsNullOrEmpty(user.ExternalId))
             {
-                user.GoogleId = userInfo.Sub;
+                user.ExternalId = googleId;
+                user.Provider = AuthProvider.Google;
+                user.EmailVerified = true;
                 user.UpdatedAt = DateTime.UtcNow;
                 await _repository.UpdateAsync(user);
             }
@@ -229,14 +345,15 @@ public class AuthService : IAuthService
         {
             // Nuevo usuario
             var adminEmails = _configuration.GetSection("AdminEmails").Get<string[]>() ?? Array.Empty<string>();
-            var role = adminEmails.Contains(userInfo.Email, StringComparer.OrdinalIgnoreCase)
+            var role = adminEmails.Contains(email, StringComparer.OrdinalIgnoreCase)
                 ? UserRole.Admin
                 : UserRole.Client;
 
             user = new User
             {
-                Email = userInfo.Email,
-                GoogleId = userInfo.Sub,
+                Email = email,
+                ExternalId = googleId,
+                Provider = AuthProvider.Google,
                 PasswordHash = string.Empty,
                 Role = role,
                 EmailVerified = true,
@@ -257,10 +374,10 @@ public class AuthService : IAuthService
             Message = "Autenticado con Google exitosamente",
             UserId = user.Id,
             Email = user.Email,
-            Name = userInfo.Name,
+            Name = payload.GivenName,
+            LastName = payload.FamilyName,
             Role = user.Role.ToString(),
-            Token = jwtToken,
-            RefreshToken = refreshToken
+            Token = jwtToken
         };
     }
 
@@ -268,9 +385,9 @@ public class AuthService : IAuthService
     // REFRESH TOKEN
     // ================================================================
 
-    public async Task<AuthResult> RefreshTokenAsync(RefreshTokenCommand command)
+    public async Task<AuthResult> RefreshTokenAsync(string refreshToken)
     {
-        var user = await _repository.GetByRefreshTokenAsync(command.RefreshToken);
+        var user = await _repository.GetByRefreshTokenAsync(refreshToken);
 
         if (user == null)
         {
@@ -291,7 +408,6 @@ public class AuthService : IAuthService
             Message = "Token renovado exitosamente",
             UserId = user.Id,
             Token = newJwt,
-            RefreshToken = newRefreshToken,
             Email = user.Email,
             Role = user.Role.ToString()
         };
@@ -313,10 +429,39 @@ public class AuthService : IAuthService
     }
 
     // ================================================================
+    // EMAIL VERIFICATION
+    // ================================================================
+
+    public async Task<AuthResult> VerifyEmailAsync(string token)
+    {
+        var user = await _repository.GetByEmailVerificationTokenAsync(token);
+        if (user == null)
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Message = "Token de verificación inválido o expirado."
+            };
+        }
+
+        user.EmailVerified = true;
+        user.EmailVerificationToken = null;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _repository.UpdateAsync(user);
+
+        return new AuthResult
+        {
+            Success = true,
+            Message = "Email verificado exitosamente.",
+            Email = user.Email
+        };
+    }
+
+    // ================================================================
     // MÉTODOS PRIVADOS
     // ================================================================
 
-    private string GenerateJwtToken(User user)
+    public string GenerateJwtToken(User user)
     {
         var jwtKey = _configuration["Jwt:Key"] ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
 
@@ -341,7 +486,7 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private static string GenerateRefreshToken()
+    public string GenerateRefreshToken()
     {
         var bytes = new byte[64];
         using var rng = RandomNumberGenerator.Create();

@@ -2,5 +2,6 @@
 /backend-net/appsettings.Development.json
 /backend-net/bin
 /backend-net/obj
+/backend-net/Migrations
 # composer variables
 docker-compose.local.yml

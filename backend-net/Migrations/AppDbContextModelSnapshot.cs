@@ -22,7 +22,7 @@ namespace backend_net.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.ContactMessage", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.Contact.ContactMessage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,242 +68,7 @@ namespace backend_net.Migrations
                     b.ToTable("contact_messages", (string)null);
                 });
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.Profile", b =>
-                {
-                    b.Property<int>("IdUser")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdUser"));
-
-                    b.Property<bool>("Available")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("AvailableText")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Education")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("EducationEndYear")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("character varying(4)");
-
-                    b.Property<string>("EducationStartYear")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("character varying(4)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("GitHubUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("LinkedInUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("PhotoUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Summary")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("VideoUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("IdUser");
-
-                    b.ToTable("profiles", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("RepositoryUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Title")
-                        .IsUnique();
-
-                    b.ToTable("projects", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.Skill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("SkillType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("skills", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.Stack", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Backend")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Cicd")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Cloud")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Conteinerization")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Database")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Frontend")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("stacks", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject", b =>
-                {
-                    b.Property<int>("IdStack")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("IdProject")
-                        .HasColumnType("integer");
-
-                    b.HasKey("IdStack", "IdProject");
-
-                    b.HasIndex("IdProject");
-
-                    b.ToTable("stack_projects", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.TrainingExercise", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.Room.TrainingExercise", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -384,42 +149,7 @@ namespace backend_net.Migrations
                     b.ToTable("training_exercises", (string)null);
                 });
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("AndrezOG.Domain.Model.WorkExperience", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.Room.WorkExperience", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -475,15 +205,379 @@ namespace backend_net.Migrations
                     b.ToTable("work_experiences", (string)null);
                 });
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.Skills.Skill", b =>
                 {
-                    b.HasOne("AndrezOG.Domain.Model.Project", "Project")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("image_url");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("SkillType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type_skill");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("skills", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RepositoryUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Title")
+                        .IsUnique();
+
+                    b.ToTable("projects", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.Stack", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("stacks", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.StackProject", b =>
+                {
+                    b.Property<int>("IdStack")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IdProject")
+                        .HasColumnType("integer");
+
+                    b.HasKey("IdStack", "IdProject");
+
+                    b.HasIndex("IdProject");
+
+                    b.ToTable("stack_projects", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.StackSkill", b =>
+                {
+                    b.Property<int>("IdStack")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IdSkill")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StackRole")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("IdStack", "IdSkill");
+
+                    b.HasIndex("IdSkill");
+
+                    b.ToTable("stack_skills", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.Tenant.Profile", b =>
+                {
+                    b.Property<int>("IdUser")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_user");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdUser"));
+
+                    b.Property<bool>("Available")
+                        .HasColumnType("boolean")
+                        .HasColumnName("available");
+
+                    b.Property<string>("AvailableText")
+                        .HasColumnType("text")
+                        .HasColumnName("available_text");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("city");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("country");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Education")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("education");
+
+                    b.Property<string>("EducationEndYear")
+                        .HasColumnType("text")
+                        .HasColumnName("education_end_year");
+
+                    b.Property<string>("EducationStartYear")
+                        .HasColumnType("text")
+                        .HasColumnName("education_start_year");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("GitHubUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("git_hub_url");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("LinkedInUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("linked_in_url");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_number");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("photo_url");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("state");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("summary");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("VideoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("video_url");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("zip_code");
+
+                    b.HasKey("IdUser");
+
+                    b.ToTable("profiles", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.Tenant.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("EmailVerificationToken")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("text")
+                        .HasColumnName("external_id");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer")
+                        .HasColumnName("role");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("two_factor_enabled");
+
+                    b.Property<string>("TwoFactorSecret")
+                        .HasColumnType("text")
+                        .HasColumnName("two_factor_secret");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.StackProject", b =>
+                {
+                    b.HasOne("AndrezOG.Domain.Model.StackProject.Project", "Project")
                         .WithMany("StackProjects")
                         .HasForeignKey("IdProject")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AndrezOG.Domain.Model.Stack", "Stack")
+                    b.HasOne("AndrezOG.Domain.Model.StackProject.Stack", "Stack")
                         .WithMany("StackProjects")
                         .HasForeignKey("IdStack")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -494,14 +588,35 @@ namespace backend_net.Migrations
                     b.Navigation("Stack");
                 });
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.Project", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.StackSkill", b =>
+                {
+                    b.HasOne("AndrezOG.Domain.Model.Skills.Skill", "Skill")
+                        .WithMany()
+                        .HasForeignKey("IdSkill")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AndrezOG.Domain.Model.StackProject.Stack", "Stack")
+                        .WithMany("StackSkills")
+                        .HasForeignKey("IdStack")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("Stack");
+                });
+
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.Project", b =>
                 {
                     b.Navigation("StackProjects");
                 });
 
-            modelBuilder.Entity("AndrezOG.Domain.Model.Stack", b =>
+            modelBuilder.Entity("AndrezOG.Domain.Model.StackProject.Stack", b =>
                 {
                     b.Navigation("StackProjects");
+
+                    b.Navigation("StackSkills");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,7 +15,7 @@
 
     <!-- Navbar -->
     <nav class="flex justify-between items-center px-8 py-4" style="color: #1F1F1F;">
-      <span class="text-xl font-bold tracking-wider" style="color: #A52A2A; font-family: 'Cinzel', 'Playfair Display', serif;">AndrezOG</span>
+      <span class="text-xl font-bold tracking-wider" style="color: #000000; font-family: 'Cinzel', 'Playfair Display', serif;">AndrezOG</span>
 
       <!-- Submenú "Get in Touch" con hover -->
       <div
@@ -25,7 +25,7 @@
       >
         <span #menuTrigger
           class="cursor-pointer transition-colors"
-          style="color: #1F1F1F;"
+          style="color: #000000; font-weight: bold;"
           (mouseenter)="$any(menuTrigger).style.color = '#A52A2A'"
           (mouseleave)="$any(menuTrigger).style.color = '#1F1F1F'">
           Get in Touch
@@ -184,6 +184,31 @@
 
       }
     </section>
+
+    <!-- Info Grid (Focus / Style / Goal) -->
+    <section class="info-grid" id="about">
+      <article>
+        <span>01</span>
+        <h2>Focus</h2>
+        <p>Build clean interfaces, solid APIs and playful experiences with a modern stack.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h2>Style</h2>
+        <p>Minimal layout, strong contrast and a cinematic hero that keeps the attention on the message.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h2>Goal</h2>
+        <p>A landing page that introduces the portfolio before the rest of the app content.</p>
+      </article>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer" id="contact">
+      <p>AndrezOG · Portfolio landing</p>
+      <a href="mailto:contacto@andrezog.dev">contacto@andrezog.dev</a>
+    </footer>
 
   </div>
 </div>

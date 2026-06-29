@@ -24,11 +24,18 @@
                 />
             </div>
 
-            @if (errorMessage) {
-                <p class="error-message">{{ errorMessage }}</p>
+            @if (errorMessage()) {
+                <p class="error-message">{{ errorMessage() }}</p>
             }
 
             <button type="submit">Entrar</button>
+
+            <div class="divider">
+                <span>o</span>
+            </div>
+
+            <div id="googleSignInBtn" class="google-btn-container"></div>
+
             <p class="register-link">
                 ¿No tienes una cuenta?
                 <a routerLink="/register">Regístrate</a>

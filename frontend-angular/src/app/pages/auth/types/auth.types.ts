@@ -13,10 +13,17 @@ export interface LoginRequest {
     password: string;
 }
 
+export interface ExternalLoginRequest {
+    provider: string;
+    idToken: string;
+}
+
 export interface AuthResponse {
     message: string;
     token: string;
+    userId: number;
     email: string;
+    name: string;
     role: string;
 }
 

@@ -24,9 +24,9 @@ public class AuthRepository : IAuthRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<User?> GetByGoogleIdAsync(string googleId)
+    public async Task<User?> GetByExternalIdAsync(string externalId)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId);
+        return await _context.Users.FirstOrDefaultAsync(u => u.ExternalId == externalId);
     }
 
     public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
@@ -35,6 +35,12 @@ public class AuthRepository : IAuthRepository
             .FirstOrDefaultAsync(u =>
                 u.RefreshToken == refreshToken &&
                 u.RefreshTokenExpires > DateTime.UtcNow);
+    }
+
+    public async Task<User?> GetByEmailVerificationTokenAsync(string token)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.EmailVerificationToken == token);
     }
 
     public async Task<bool> EmailExistsAsync(string email)

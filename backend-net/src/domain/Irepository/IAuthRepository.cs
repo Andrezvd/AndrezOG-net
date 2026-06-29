@@ -5,9 +5,10 @@ public interface IAuthRepository
 {
     Task<User?> GetByIdAsync(int id);
     Task<User?> GetByEmailAsync(string email);
-    Task<User?> GetByGoogleIdAsync(string googleId);
+    Task<User?> GetByExternalIdAsync(string externalId);
     Task<User?> GetByRefreshTokenAsync(string refreshToken);
     Task<bool> EmailExistsAsync(string email);
+    Task<User?> GetByEmailVerificationTokenAsync(string token);
     Task<User> CreateAsync(User user);
     User Add(User user);
     Task UpdateAsync(User user);

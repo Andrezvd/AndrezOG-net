@@ -33,11 +33,18 @@
                 <input type="text" id="country" [(ngModel)]="RegisterRequest.country" name="country" required>
             </div>
 
-            @if (errorMessage) {
-                <p class="error-message">{{ errorMessage }}</p>
+            @if (errorMessage()) {
+                <p class="error-message">{{ errorMessage() }}</p>
             }
 
             <button type="submit">Registrarse</button>
+
+            <div class="divider">
+                <span>o</span>
+            </div>
+
+            <div id="googleSignInBtn" class="google-btn-container"></div>
+
             <p class="login-link">¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión</a></p>
         </form>
     </div>

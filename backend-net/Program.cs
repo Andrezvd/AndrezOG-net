@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
 using AndrezOG.Infrastructure.Repository;
-using AndrezOG.Infrastructure.Auth;
 using AndrezOG.Application;
 using AndrezOG.Application.Iservices;
 using AndrezOG.Domain.Irepository;
@@ -41,17 +40,6 @@ var webRootPath = builder.Environment.WebRootPath
     ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 builder.Services.AddSingleton(new FileStorageService(webRootPath));
 
-// Google OAuth
-builder.Services.AddSingleton<GoogleAuthService>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-    var http = httpClientFactory.CreateClient();
-    var clientId = config["Google:ClientId"] ?? throw new InvalidOperationException("Google:ClientId no configurado");
-    var clientSecret = config["Google:ClientSecret"] ?? throw new InvalidOperationException("Google:ClientSecret no configurado");
-    return new GoogleAuthService(http, clientId, clientSecret);
-});
-
 // Rate Limiter para login (previene fuerza bruta)
 builder.Services.AddRateLimiter(options =>
 {
@@ -77,7 +65,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 
 // configuracion JWT
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "No se encontro la clave JWT en appsettings.json, por favor agregue una clave segura";
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

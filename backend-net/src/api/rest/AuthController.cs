@@ -15,16 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IProfileService _profileService;
-    private readonly IConfiguration _configuration;
 
     public AuthController(
         IAuthService authService,
-        IProfileService profileService,
-        IConfiguration configuration)
+        IProfileService profileService)
     {
         _authService = authService;
         _profileService = profileService;
-        _configuration = configuration;
     }
 
     // ================================================================
@@ -39,28 +36,16 @@ public class AuthController : ControllerBase
             return BadRequest(new ErrorResponse("Las contraseñas no coinciden"));
         }
 
-        var registerCommand = AuthMappers.ToRegisterCommand(request);
-
-        // Primero registrar el usuario
-        var result = await _authService.RegisterAsync(registerCommand);
+        var userCommand = AuthMappers.ToRegisterCommand(request);
+        var profileCommand = AuthMappers.ToCreateDefaultProfileCommand(request, 0);
+        var result = await _authService.RegisterWithProfileAsync(userCommand, profileCommand);
 
         if (!result.Success)
         {
             return BadRequest(AuthMappers.ToErrorResponse(result));
         }
 
-        // Luego crear el perfil por defecto (si falla, el usuario ya existe pero no tiene perfil)
-        try
-        {
-            var profileCommand = AuthMappers.ToCreateDefaultProfileCommand(request, result.UserId!.Value);
-            await _profileService.CreateDefaultProfileAsync(profileCommand);
-        }
-        catch
-        {
-            // No deshacer el registro, solo loggear el error
-            // El perfil puede crearse después desde el frontend
-        }
-
+        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
@@ -79,100 +64,69 @@ public class AuthController : ControllerBase
             return Unauthorized(AuthMappers.ToErrorResponse(result));
         }
 
+        // Generar y guardar refresh token como cookie HttpOnly
+        var refreshToken = _authService.GenerateRefreshToken();
+        SetRefreshTokenCookie(refreshToken);
+
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
     // ================================================================
-    // GOOGLE OAUTH
+    // LOGIN EXTERNO (Google, GitHub, etc.)
     // ================================================================
 
-    /// <summary>
-    /// Inicia el flujo OAuth redirigiendo al usuario a Google.
-    /// El frontend debe llamar a este endpoint para obtener la URL de Google.
-    /// </summary>
-    [HttpGet("google/login")]
-    public IActionResult GoogleLogin()
+    [HttpPost("external")]
+    public async Task<ActionResult<AuthResponse>> ExternalLogin([FromBody] ExternalLoginRequest request)
     {
-        var clientId = _configuration["Google:ClientId"];
-        var redirectUri = _configuration["Google:RedirectUri"]
-            ?? $"{Request.Scheme}://{Request.Host}/api/auth/google/callback";
-
-        var googleAuthUrl =
-            "https://accounts.google.com/o/oauth2/v2/auth" +
-            $"?client_id={clientId}" +
-            $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-            "&response_type=code" +
-            "&scope=openid%20email%20profile" +
-            "&access_type=offline" +
-            "&prompt=consent";
-
-        return Ok(new { url = googleAuthUrl });
-    }
-
-    /// <summary>
-    /// Callback que Google llama después de que el usuario se autentica.
-    /// Intercambia el code por tokens y crea/linkea el usuario en BD.
-    /// </summary>
-    [HttpGet("google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string code)
-    {
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            return BadRequest(new ErrorResponse("Código de autorización no proporcionado."));
-        }
-
-        var redirectUri = _configuration["Google:RedirectUri"]
-            ?? $"{Request.Scheme}://{Request.Host}/api/auth/google/callback";
-
-        var command = new GoogleLoginCommand(code, redirectUri);
-        var result = await _authService.GoogleLoginAsync(command);
+        var command = new ExternalLoginCommand(request.Provider, request.IdToken);
+        var result = await _authService.ExternalLoginAsync(command);
 
         if (!result.Success)
         {
             return BadRequest(AuthMappers.ToErrorResponse(result));
         }
 
-        // Crear perfil por defecto si es un usuario nuevo (sin GoogleId preexistente)
-        // El AuthResult ya tiene Name del userinfo de Google
-        if (!string.IsNullOrWhiteSpace(result.Name))
+        // Crear perfil por defecto (nombre y apellido de Google separados)
+        try
         {
-            // Intentar crear perfil; si ya existe, no pasa nada
-            try
-            {
-                var profileCommand = new CreateDefaultProfileCommand(
-                    result.UserId!.Value,
-                    result.Email!,
-                    result.Name,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-                await _profileService.CreateDefaultProfileAsync(profileCommand);
-            }
-            catch
-            {
-                // El perfil probablemente ya existe, ignorar
-            }
+            var profileCommand = new CreateDefaultProfileCommand(
+                result.UserId!.Value,
+                result.Email!,
+                result.Name ?? string.Empty,
+                result.LastName ?? string.Empty,
+                string.Empty,
+                string.Empty
+            );
+            await _profileService.CreateDefaultProfileAsync(profileCommand);
         }
+        catch { /* perfil ya existe */ }
 
+        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
     // ================================================================
-    // REFRESH TOKEN
+    // REFRESH TOKEN (desde cookie HttpOnly)
     // ================================================================
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<ActionResult<AuthResponse>> RefreshToken()
     {
-        var command = new RefreshTokenCommand(request.RefreshToken);
-        var result = await _authService.RefreshTokenAsync(command);
+        var refreshToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return Unauthorized(new ErrorResponse("No se encontró refresh token."));
+        }
+
+        var result = await _authService.RefreshTokenAsync(refreshToken);
 
         if (!result.Success)
         {
             return Unauthorized(AuthMappers.ToErrorResponse(result));
         }
 
+        // Rotar refresh token
+        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
@@ -184,7 +138,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        var userIdClaim = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? User.FindFirstValue("sub");
 
         if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
@@ -193,6 +147,45 @@ public class AuthController : ControllerBase
         }
 
         await _authService.LogoutAsync(userId);
+        Response.Cookies.Delete("refresh_token");
         return Ok(new { message = "Sesión cerrada exitosamente." });
+    }
+
+    // ================================================================
+    // EMAIL VERIFICATION
+    // ================================================================
+
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return BadRequest(new ErrorResponse("Token de verificación no proporcionado."));
+        }
+
+        var result = await _authService.VerifyEmailAsync(token);
+
+        if (!result.Success)
+        {
+            return BadRequest(AuthMappers.ToErrorResponse(result));
+        }
+
+        return Ok(new { message = result.Message });
+    }
+
+    // ================================================================
+    // HELPERS
+    // ================================================================
+
+    private void SetRefreshTokenCookie(string refreshToken)
+    {
+        Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false, // true en producción con HTTPS
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7),
+            Path = "/api/auth"
+        });
     }
 }
