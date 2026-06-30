@@ -59,9 +59,12 @@ export class AdminDashboardComponent implements OnInit {
   skillsLoading = signal(true);
   skillsError = signal<string | null>(null);
   newSkill = signal({ name: '', skillType: 'Technology', description: '', isActive: true });
+  skillImageFile = signal<File | null>(null);
   skillSaving = signal(false);
   skillSaveMsg = signal<string | null>(null);
   skillEditId = signal<number | null>(null);
+  skillEditImageFile = signal<File | null>(null);
+  skillEditRemoveImage = signal(false);
   skillTypes = ['Technology', 'Methodology', 'SoftSkill', 'Certification'];
 
   constructor(
@@ -154,19 +157,38 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  onSkillImageSelected(event: Event, editMode: boolean = false): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (editMode) {
+      this.skillEditImageFile.set(file);
+      this.skillEditRemoveImage.set(false);
+    } else {
+      this.skillImageFile.set(file);
+    }
+    input.value = '';
+  }
+
   createSkill(): void {
     const s = this.newSkill();
     if (!s.name.trim()) return;
     this.skillSaving.set(true);
+    this.skillSaveMsg.set(null);
     const formData = new FormData();
     formData.append('name', s.name);
     formData.append('skillType', s.skillType);
-    formData.append('description', s.description);
+    formData.append('description', s.description ?? '');
     formData.append('isActive', String(s.isActive));
+    const img = this.skillImageFile();
+    if (img) {
+      formData.append('imageFile', img);
+    }
     this.http.post<SkillDto>(`${API_URL}/skill`, formData).subscribe({
       next: (created) => {
         this.skills.set([...this.skills(), created]);
         this.newSkill.set({ name: '', skillType: 'Technology', description: '', isActive: true });
+        this.skillImageFile.set(null);
         this.skillSaving.set(false);
       },
       error: (err) => { this.skillSaveMsg.set(err?.error?.message ?? 'Error al crear skill.'); this.skillSaving.set(false); setTimeout(() => this.skillSaveMsg.set(null), 3000); }
@@ -186,7 +208,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   editSkill(skill: SkillDto): void {
-    this.skillEditId.set(skill.id === this.skillEditId() ? null : skill.id);
+    const isOpening = skill.id !== this.skillEditId();
+    this.skillEditId.set(isOpening ? skill.id : null);
+    if (isOpening) {
+      // Resetear estado de edición de imagen
+      this.skillEditImageFile.set(null);
+      this.skillEditRemoveImage.set(false);
+    }
   }
 
   saveSkillEdit(skill: SkillDto): void {
@@ -195,10 +223,27 @@ export class AdminDashboardComponent implements OnInit {
     formData.append('skillType', skill.skillType);
     formData.append('description', skill.description ?? '');
     formData.append('isActive', String(skill.isActive));
+    const editImg = this.skillEditImageFile();
+    if (editImg) {
+      formData.append('imageFile', editImg);
+    }
+    if (this.skillEditRemoveImage()) {
+      formData.append('removeImage', 'true');
+    }
     this.http.patch<SkillDto>(`${API_URL}/skill/${skill.id}`, formData).subscribe({
-      next: (updated) => { this.skills.set(this.skills().map(s => s.id === updated.id ? updated : s)); this.skillEditId.set(null); },
+      next: (updated) => {
+        this.skills.set(this.skills().map(s => s.id === updated.id ? updated : s));
+        this.skillEditId.set(null);
+        this.skillEditImageFile.set(null);
+        this.skillEditRemoveImage.set(false);
+      },
       error: () => { this.skillSaveMsg.set('Error al guardar cambios.'); setTimeout(() => this.skillSaveMsg.set(null), 3000); }
     });
+  }
+
+  removeEditSkillImage(): void {
+    this.skillEditImageFile.set(null);
+    this.skillEditRemoveImage.set(true);
   }
 
   deleteSkill(skill: SkillDto): void {

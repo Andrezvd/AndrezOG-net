@@ -79,10 +79,7 @@ public class AuthService : IAuthService
 
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
-
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
-        await _repository.UpdateAsync(user);
+        await SaveRefreshToken(user, refreshToken);
 
         return new AuthResult
         {
@@ -92,7 +89,8 @@ public class AuthService : IAuthService
             Email = user.Email,
             Name = string.Empty,
             Role = user.Role.ToString(),
-            Token = token
+            Token = token,
+            RefreshToken = refreshToken
         };
     }
 
@@ -169,10 +167,7 @@ public class AuthService : IAuthService
 
             var token = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
-            await _repository.UpdateAsync(user);
+            await SaveRefreshToken(user, refreshToken);
 
             return new AuthResult
             {
@@ -182,7 +177,8 @@ public class AuthService : IAuthService
                 Email = user.Email,
                 Name = profileCommand.Name,
                 Role = user.Role.ToString(),
-                Token = token
+                Token = token,
+                RefreshToken = refreshToken
             };
         }
         catch
@@ -262,7 +258,8 @@ public class AuthService : IAuthService
             Email = user.Email,
             Name = string.Empty,
             Role = user.Role.ToString(),
-            Token = token
+            Token = token,
+            RefreshToken = refreshToken
         };
     }
 
@@ -304,12 +301,12 @@ public class AuthService : IAuthService
 
             payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
         }
-        catch (Exception ex)
+        catch
         {
             return new AuthResult
             {
                 Success = false,
-                Message = $"Token de Google inválido o expirado: {ex.Message}"
+                Message = "Token de Google inválido o expirado."
             };
         }
 
@@ -377,7 +374,8 @@ public class AuthService : IAuthService
             Name = payload.GivenName,
             LastName = payload.FamilyName,
             Role = user.Role.ToString(),
-            Token = jwtToken
+            Token = jwtToken,
+            RefreshToken = refreshToken
         };
     }
 
@@ -387,7 +385,8 @@ public class AuthService : IAuthService
 
     public async Task<AuthResult> RefreshTokenAsync(string refreshToken)
     {
-        var user = await _repository.GetByRefreshTokenAsync(refreshToken);
+        var refreshTokenHash = HashToken(refreshToken);
+        var user = await _repository.GetByRefreshTokenAsync(refreshTokenHash);
 
         if (user == null)
         {
@@ -408,6 +407,7 @@ public class AuthService : IAuthService
             Message = "Token renovado exitosamente",
             UserId = user.Id,
             Token = newJwt,
+            RefreshToken = newRefreshToken,
             Email = user.Email,
             Role = user.Role.ToString()
         };
@@ -463,7 +463,11 @@ public class AuthService : IAuthService
 
     public string GenerateJwtToken(User user)
     {
-        var jwtKey = _configuration["Jwt:Key"] ?? "ClaveDeDesarrolloLocal-SoloParaFallback-2025!";
+        var jwtKey = _configuration["Jwt:Key"];
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            throw new InvalidOperationException("Jwt:Key no configurado.");
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -496,9 +500,15 @@ public class AuthService : IAuthService
 
     private async Task SaveRefreshToken(User user, string refreshToken)
     {
-        user.RefreshToken = refreshToken;
+        user.RefreshToken = HashToken(refreshToken);
         user.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
         await _repository.UpdateAsync(user);
+    }
+
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToBase64String(bytes);
     }
 
     private static string GenerateVerificationToken()

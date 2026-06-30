@@ -62,18 +62,9 @@ public class SkillRepository : ISkillRepository
 
     public async Task<Skill?> UpdateAsync(Skill skill)
     {
-        var existing = await _context.Skills.FindAsync(skill.Id);
-        if (existing is null) return null;
-
-        existing.Name = skill.Name;
-        existing.SkillType = skill.SkillType;
-        existing.Description = skill.Description;
-        existing.IsActive = skill.IsActive;
-        existing.ImageUrl = skill.ImageUrl;
-        existing.UpdatedAt = DateTime.UtcNow;
-
+        _context.Entry(skill).State = EntityState.Modified;
         await _context.SaveChangesAsync();
-        return existing;
+        return skill;
     }
 
     public async Task<Skill?> SoftDeleteAsync(int id)

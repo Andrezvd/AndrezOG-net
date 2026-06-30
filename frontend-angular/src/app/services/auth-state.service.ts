@@ -10,6 +10,8 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
+const AUTH_STORAGE_KEY = 'andrezog_auth_state';
+
 const initialState: AuthState = {
   token: null,
   userId: null,
@@ -22,6 +24,10 @@ const initialState: AuthState = {
 @Injectable({ providedIn: 'root' })
 export class AuthStateService {
   private _state = new BehaviorSubject<AuthState>(initialState);
+
+  constructor() {
+    this.hydrateFromStorage();
+  }
 
   get state(): AuthState {
     return this._state.value;
@@ -44,18 +50,22 @@ export class AuthStateService {
   }
 
   setAuth(response: { token: string; userId: number; email: string; name: string; role: string }): void {
-    this._state.next({
+    const nextState: AuthState = {
       token: response.token,
       userId: response.userId,
       email: response.email,
       name: response.name,
       role: response.role,
       isAuthenticated: true
-    });
+    };
+
+    this._state.next(nextState);
+    this.saveToStorage(nextState);
   }
 
   clearAuth(): void {
     this._state.next(initialState);
+    this.removeFromStorage();
   }
 
   /**
@@ -72,5 +82,38 @@ export class AuthStateService {
     } catch {
       return true;
     }
+  }
+
+  private hydrateFromStorage(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw) as AuthState;
+      if (!parsed?.token) {
+        this.removeFromStorage();
+        return;
+      }
+
+      this._state.next(parsed);
+
+      if (this.isTokenExpiringSoon(0)) {
+        this.clearAuth();
+      }
+    } catch {
+      this.clearAuth();
+    }
+  }
+
+  private saveToStorage(state: AuthState): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private removeFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
   }
 }

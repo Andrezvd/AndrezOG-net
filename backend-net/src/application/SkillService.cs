@@ -59,10 +59,6 @@ public class SkillService : ISkillService
         if (await _repository.ExistsByNameAsync(command.Name))
             return SkillResult.Fail($"Ya existe una skill con el nombre '{command.Name}'.");
 
-        // Validar SkillType contra el enum
-        if (!Enum.TryParse<SkillType>(command.SkillType, ignoreCase: true, out _))
-            return SkillResult.Fail($"SkillType invalido: '{command.SkillType}'. Use: Technology, Methodology, SoftSkill, Certification.");
-
         string? imageUrl = null;
 
         if (command.ImageFile is not null)
@@ -101,10 +97,6 @@ public class SkillService : ISkillService
         // Idempotencia: evitar duplicados (excluyendo el registro actual)
         if (await _repository.ExistsByNameAsync(command.Name, excludeId: command.Id))
             return SkillResult.Fail($"Ya existe otra skill con el nombre '{command.Name}'.");
-
-        // Validar SkillType
-        if (!Enum.TryParse<SkillType>(command.SkillType, ignoreCase: true, out _))
-            return SkillResult.Fail($"SkillType invalido: '{command.SkillType}'. Use: Technology, Methodology, SoftSkill, Certification.");
 
         string? imageUrl = existing.ImageUrl;
 

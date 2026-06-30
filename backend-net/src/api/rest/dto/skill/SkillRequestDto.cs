@@ -1,6 +1,7 @@
 namespace AndrezOG.Api.Rest.Dto.Skill;
 
 using System.ComponentModel.DataAnnotations;
+using AndrezOG.Domain.Model.Skills;
 
 public class SkillRequestDto
 {
@@ -9,9 +10,7 @@ public class SkillRequestDto
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El tipo de skill es requerido")]
-    [AllowedValues("Technology", "Methodology", "SoftSkill", "Certification",
-        ErrorMessage = "SkillType debe ser: Technology, Methodology, SoftSkill o Certification")]
-    public string SkillType { get; set; } = string.Empty;
+    public SkillType SkillType { get; set; }
 
     [MaxLength(500, ErrorMessage = "La descripcion no puede exceder 500 caracteres")]
     public string? Description { get; set; }

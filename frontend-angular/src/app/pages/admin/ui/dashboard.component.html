@@ -91,6 +91,10 @@
             @for (t of skillTypes; track t) { <option [value]="t">{{ t }}</option> }
           </select>
           <input type="text" placeholder="Descripción (opcional)" [ngModel]="newSkill().description" (ngModelChange)="newSkill.set({...newSkill(), description: $event})" class="skill-desc" />
+          <label class="skill-image-upload">
+            <span>📷 {{ skillImageFile() ? skillImageFile()!.name : 'Ícono / Imagen' }}</span>
+            <input type="file" accept="image/*" (change)="onSkillImageSelected($event)" hidden />
+          </label>
           <button class="btn-save text-sm" (click)="createSkill()" [disabled]="skillSaving()">{{ skillSaving() ? '...' : '+ Crear' }}</button>
         </div>
         @if (skillSaveMsg()) { <p class="save-msg text-sm mt-2">{{ skillSaveMsg() }}</p> }
@@ -113,11 +117,27 @@
               </div>
               @if (skillEditId() === skill.id) {
                 <div class="skill-edit">
-                  <input type="text" [ngModel]="skill.name" />
-                  <select [ngModel]="skill.skillType">
+                  <input type="text" [(ngModel)]="skill.name" />
+                  <select [(ngModel)]="skill.skillType">
                     @for (t of skillTypes; track t) { <option [value]="t">{{ t }}</option> }
                   </select>
-                  <input type="text" [ngModel]="skill.description" placeholder="Descripción" />
+                  <input type="text" [(ngModel)]="skill.description" placeholder="Descripción" />
+                  <div class="skill-edit-image">
+                    @if (skill.imageUrl && !skillEditRemoveImage() && !skillEditImageFile()) {
+                      <img [src]="apiImagesUrl + skill.imageUrl" alt="preview" class="skill-img-preview" />
+                      <button class="btn-sm btn-danger" (click)="removeEditSkillImage()">🗑 Quitar</button>
+                    } @else if (skillEditImageFile()) {
+                      <span class="skill-img-name">{{ skillEditImageFile()!.name }}</span>
+                      <button class="btn-sm btn-danger" (click)="removeEditSkillImage()">🗑 Quitar</button>
+                    } @else if (skillEditRemoveImage()) {
+                      <span class="skill-img-removed">(Imagen eliminada)</span>
+                      <span class="btn-sm text-xs text-gray-400" (click)="skillEditRemoveImage.set(false)">↩ No quitar</span>
+                    }
+                    <label class="btn-sm">
+                      {{ skill.imageUrl && !skillEditRemoveImage() ? 'Cambiar' : 'Agregar' }}
+                      <input type="file" accept="image/*" (change)="onSkillImageSelected($event, true)" hidden />
+                    </label>
+                  </div>
                   <button class="btn-save text-sm" (click)="saveSkillEdit(skill)">Guardar</button>
                 </div>
               }

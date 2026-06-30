@@ -13,7 +13,12 @@ public class SkillConfiguration : IEntityTypeConfiguration<Skill>
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("id");
         entity.Property(e => e.Name).IsRequired().HasMaxLength(100).HasColumnName("name");
         entity.Property(e => e.Description).HasMaxLength(500).HasColumnName("description");
-        entity.Property(e => e.SkillType).IsRequired().HasColumnName("type_skill");
+
+        entity.Property(e => e.SkillType)
+            .IsRequired()
+            .HasColumnName("type_skill")
+            .HasColumnType("skill_type");
+
         entity.Property(e => e.IsActive).IsRequired().HasColumnName("is_active");
         entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(200).HasColumnName("image_url");
         entity.Property(e => e.CreatedAt).IsRequired().HasColumnName("created_at");

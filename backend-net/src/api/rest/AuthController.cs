@@ -6,6 +6,7 @@ using AndrezOG.Api.Rest.Dto.Auth;
 using AndrezOG.Api.Rest.Mapper.Auth;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,13 +16,16 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IProfileService _profileService;
+    private readonly IWebHostEnvironment _environment;
 
     public AuthController(
         IAuthService authService,
-        IProfileService profileService)
+        IProfileService profileService,
+        IWebHostEnvironment environment)
     {
         _authService = authService;
         _profileService = profileService;
+        _environment = environment;
     }
 
     // ================================================================
@@ -45,7 +49,7 @@ public class AuthController : ControllerBase
             return BadRequest(AuthMappers.ToErrorResponse(result));
         }
 
-        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
+        SetRefreshTokenCookie(result.RefreshToken!);
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
@@ -54,6 +58,7 @@ public class AuthController : ControllerBase
     // ================================================================
 
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
     {
         var command = new LoginCommand(request.Email, request.Password);
@@ -64,9 +69,7 @@ public class AuthController : ControllerBase
             return Unauthorized(AuthMappers.ToErrorResponse(result));
         }
 
-        // Generar y guardar refresh token como cookie HttpOnly
-        var refreshToken = _authService.GenerateRefreshToken();
-        SetRefreshTokenCookie(refreshToken);
+        SetRefreshTokenCookie(result.RefreshToken!);
 
         return Ok(AuthMappers.ToAuthResponse(result));
     }
@@ -101,7 +104,7 @@ public class AuthController : ControllerBase
         }
         catch { /* perfil ya existe */ }
 
-        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
+        SetRefreshTokenCookie(result.RefreshToken!);
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
@@ -126,7 +129,7 @@ public class AuthController : ControllerBase
         }
 
         // Rotar refresh token
-        SetRefreshTokenCookie(_authService.GenerateRefreshToken());
+        SetRefreshTokenCookie(result.RefreshToken!);
         return Ok(AuthMappers.ToAuthResponse(result));
     }
 
@@ -147,7 +150,13 @@ public class AuthController : ControllerBase
         }
 
         await _authService.LogoutAsync(userId);
-        Response.Cookies.Delete("refresh_token");
+        Response.Cookies.Delete("refresh_token", new CookieOptions
+        {
+            Path = "/api/auth",
+            SameSite = SameSiteMode.Strict,
+            Secure = !_environment.IsDevelopment(),
+            HttpOnly = true
+        });
         return Ok(new { message = "Sesión cerrada exitosamente." });
     }
 
@@ -182,7 +191,7 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false, // true en producción con HTTPS
+            Secure = !_environment.IsDevelopment(),
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(7),
             Path = "/api/auth"

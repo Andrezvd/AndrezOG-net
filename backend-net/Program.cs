@@ -10,14 +10,21 @@ using AndrezOG.Infrastructure.Repository;
 using AndrezOG.Application;
 using AndrezOG.Application.Iservices;
 using AndrezOG.Domain.Irepository;
+using AndrezOG.Domain.Model.Skills;
 using AndrezOG.Shared.StorageService;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // CORS: permitir requests desde los frontends React (5173) y Angular (4200) en desarrollo
 builder.Services.AddCors(options =>
 {
@@ -33,7 +40,8 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        npgsqlOptions.MapEnum<SkillType>("skill_type")));
 
 // File Storage (singleton: una instancia para toda la app)
 var webRootPath = builder.Environment.WebRootPath
@@ -65,7 +73,11 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 
 // configuracion JWT
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "No se encontro la clave JWT en appsettings.json, por favor agregue una clave segura";
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("Jwt:Key no configurado.");
+}
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

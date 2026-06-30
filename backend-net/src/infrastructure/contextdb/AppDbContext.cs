@@ -6,6 +6,7 @@ using AndrezOG.Domain.Model.Room;
 using AndrezOG.Domain.Model.Skills;
 using AndrezOG.Domain.Model.StackProject;
 using Microsoft.EntityFrameworkCore;
+
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }

@@ -1,9 +1,18 @@
 namespace AndrezOG.Domain.Model.Skills;
 
+using NpgsqlTypes;
+
 public enum SkillType
 {
-    Technology,      // Angular, .NET
-    Methodology,     // Scrum, Kanban
-    SoftSkill,       // Leadership, Communication
-    Certification    // AWS Certified, Scrum Master
+    [PgName("Technology")]
+    Technology,
+
+    [PgName("Methodology")]
+    Methodology,
+
+    [PgName("SoftSkill")]
+    SoftSkill,
+
+    [PgName("Certification")]
+    Certification
 }
