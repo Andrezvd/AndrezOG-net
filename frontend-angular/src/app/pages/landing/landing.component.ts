@@ -6,6 +6,7 @@ import { catchError } from 'rxjs/operators';
 import { GameCanvas } from '../../game-canvas/game-canvas';
 import { ProfileService } from '../profile/api/profile.service';
 import { MyProfileDto } from '../profile/types/profile.types';
+import { API_URL_IMAGES } from '../../services-conf/api-config';
 
 @Component({
     selector: 'app-landing',
@@ -17,6 +18,7 @@ export class LandingComponent {
     showPortfolio = false;
     menuOpen = false;
     profile$: Observable<MyProfileDto | null> = of(null);
+    apiImagesUrl = API_URL_IMAGES;
 
     constructor(private profileService: ProfileService) { }
 

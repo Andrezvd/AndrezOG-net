@@ -70,9 +70,9 @@ public class ProfileService : IProfileService
         await _repository.UpdateAsync(profile);
     }
 
-    public async Task<Profile?> GetMyProfileAsync()
+    public async Task<Profile?> GetByUserIdAsync(int userId)
     {
-        return await _repository.GetMyProfileAsync();
+        return await _repository.GetByUserIdAsync(userId);
     }
 
     public async Task<Profile?> GetPublicProfileAsync()

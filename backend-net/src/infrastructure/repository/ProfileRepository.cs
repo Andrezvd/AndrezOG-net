@@ -31,13 +31,6 @@ public class ProfileRepository : IProfileRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Profile?> GetMyProfileAsync()
-    {
-        string email = "andreziwis@gmail.com";
-        var profile = await _context.Profiles.FirstOrDefaultAsync(profile => profile.Email == email);
-        return profile;
-    }
-
     public async Task<Profile?> GetPublicProfileAsync()
     {
         return await _context.Profiles.FirstOrDefaultAsync(p => p.IdUser == 5);

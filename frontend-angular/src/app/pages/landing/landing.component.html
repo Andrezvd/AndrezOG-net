@@ -76,7 +76,7 @@
             <!-- Foto circular -->
             @if (profile.photoUrl) {
               <img
-                [src]="profile.photoUrl"
+                [src]="apiImagesUrl + profile.photoUrl"
                 [alt]="profile.name"
                 class="w-32 h-32 rounded-full object-cover shadow-xl"
                 style="border: 4px solid #C7A44B;"

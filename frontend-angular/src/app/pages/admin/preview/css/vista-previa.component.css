@@ -1,0 +1,30 @@
+/* Contenedor externo: tamaño fijo, oculta desbordamiento */
+.preview-wrapper {
+  width: 100%;
+  max-height: 700px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 8px;
+  background: #0f172a;
+}
+
+/* Escalador: réplica del landing a tamaño real, luego escalado */
+.preview-scaler {
+  transform: scale(0.48);
+  transform-origin: top left;
+  width: 208.33%; /* 100% / 0.48 = 208.33% — compensa el ancho del escalado */
+}
+
+/* Scrollbar fina para la vista previa */
+.preview-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.preview-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}

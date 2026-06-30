@@ -94,6 +94,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+// Servir archivos estáticos desde wwwroot (imágenes de perfil, skills, etc.)
+app.UseStaticFiles();
+
 // Permitir frontends mediante CORS
 app.UseCors("AllowFrontendDev");
 app.UseRateLimiter();

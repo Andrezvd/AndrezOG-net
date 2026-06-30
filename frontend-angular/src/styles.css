@@ -1,3 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* ── Scrollbar global — estilo samurái / cinematic ── */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #A52A2A rgba(31, 31, 31, 0.15);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(31, 31, 31, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A52A2A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C7A44B;
+}
+
+/* ── Estilos base globales ── */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+  background: #0a0a0a;
+  color: #1F1F1F;
+}

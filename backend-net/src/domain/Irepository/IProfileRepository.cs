@@ -7,6 +7,5 @@ public interface IProfileRepository
     Task<Profile?> GetByUserIdAsync(int userId);
     Task CreateAsync(Profile profile);
     Task UpdateAsync(Profile profile);
-    Task<Profile?> GetMyProfileAsync();
     Task<Profile?> GetPublicProfileAsync();
 }

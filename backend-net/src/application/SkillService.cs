@@ -111,7 +111,7 @@ public class SkillService : ISkillService
         // Eliminar imagen si se solicito
         if (command.RemoveImage && !string.IsNullOrWhiteSpace(existing.ImageUrl))
         {
-            _fileStorage.DeleteFile(existing.ImageUrl);
+            _fileStorage.DeleteFile(existing.ImageUrl, "skills");
             imageUrl = null;
         }
 
@@ -119,7 +119,7 @@ public class SkillService : ISkillService
         if (command.ImageFile is not null)
         {
             if (!string.IsNullOrWhiteSpace(existing.ImageUrl))
-                _fileStorage.DeleteFile(existing.ImageUrl);
+                _fileStorage.DeleteFile(existing.ImageUrl, "skills");
 
             try
             {
@@ -159,7 +159,7 @@ public class SkillService : ISkillService
 
         // Eliminar archivo de imagen del disco
         if (!string.IsNullOrWhiteSpace(skill.ImageUrl))
-            _fileStorage.DeleteFile(skill.ImageUrl);
+            _fileStorage.DeleteFile(skill.ImageUrl, "skills");
 
         await _repository.HardDeleteAsync(id);
         return SkillResult.Ok(MapToDto(skill));

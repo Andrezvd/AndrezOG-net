@@ -1,5 +1,140 @@
-<div class="admin-dashboard">
-  <h1>Panel de Administración</h1>
-  <p>Bienvenido, {{ userName }} ({{ userEmail }})</p>
-  <button (click)="logout()">Cerrar Sesión</button>
+<div class="admin-shell">
+  <!-- ===== HEADER ===== -->
+  <header class="admin-header">
+    <div class="header-left">
+      <h1 class="header-title">Panel de Administración</h1>
+      <p class="header-sub">Bienvenido, Sr. {{ userName() }}</p>
+    </div>
+    <div class="header-right">
+      <span class="header-email">{{ userEmail() }}</span>
+      <button class="btn-logout" (click)="logout()">Cerrar</button>
+    </div>
+  </header>
+
+  <!-- ===== NAV ===== -->
+  <nav class="admin-nav">
+    @for (s of sections; track s.key) {
+      <button class="nav-item" [class.nav-item--active]="activeSection() === s.key" (click)="setSection(s.key)">
+        <span>{{ s.icon }}</span> {{ s.label }}
+      </button>
+    }
+  </nav>
+
+  <!-- ===== CONTENIDO ===== -->
+  <!-- ─── PERFIL ─── -->
+  @if (activeSection() === 'profile') {
+    @if (profileLoading()) {
+      <main class="admin-main"><p class="text-gray-400">Cargando perfil...</p></main>
+    } @else if (profileError()) {
+      <main class="admin-main"><p class="text-red-400">{{ profileError() }}</p></main>
+    } @else if (profile()) {
+      @let p = profile()!;
+      <main class="admin-main two-col">
+        <section class="col-form">
+          <h2 class="section-title">Editar Perfil</h2>
+          <div class="photo-section">
+            @if (p.photoUrl) {
+              <img [src]="apiImagesUrl + p.photoUrl" alt="Foto" class="photo-preview" />
+            } @else {
+              <div class="photo-fallback">{{ p.name.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
+            }
+            <div class="photo-actions">
+              <label class="btn-upload">
+                {{ photoUploading() ? 'Subiendo...' : 'Cambiar foto' }}
+                <input type="file" accept="image/*" (change)="onPhotoSelected($event)" hidden />
+              </label>
+              @if (photoMsg()) { <span class="photo-msg" [class.text-green]="photoMsg()?.includes('✓')" [class.text-red]="!photoMsg()?.includes('✓')">{{ photoMsg() }}</span> }
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Nombre</label><input type="text" [(ngModel)]="p.name" /></div>
+            <div class="form-group"><label>Apellido</label><input type="text" [(ngModel)]="p.lastName" /></div>
+            <div class="form-group"><label>Título profesional</label><input type="text" [(ngModel)]="p.title" /></div>
+            <div class="form-group"><label>Email</label><input type="email" [(ngModel)]="p.email" /></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" [(ngModel)]="p.phoneNumber" /></div>
+            <div class="form-group"><label>País</label><input type="text" [(ngModel)]="p.country" /></div>
+            <div class="form-group"><label>Ciudad</label><input type="text" [(ngModel)]="p.city" /></div>
+            <div class="form-group"><label>Estado/Provincia</label><input type="text" [(ngModel)]="p.state" /></div>
+            <div class="form-group"><label>Código Postal</label><input type="text" [(ngModel)]="p.zipCode" /></div>
+            <div class="form-group"><label>Educación</label><input type="text" [(ngModel)]="p.education" /></div>
+            <div class="form-group"><label>Año inicio</label><input type="text" [(ngModel)]="p.educationStartYear" /></div>
+            <div class="form-group"><label>Año fin</label><input type="text" [(ngModel)]="p.educationEndYear" /></div>
+            <div class="form-group"><label>LinkedIn</label><input type="url" [(ngModel)]="p.linkedInUrl" /></div>
+            <div class="form-group"><label>GitHub</label><input type="url" [(ngModel)]="p.gitHubUrl" /></div>
+            <div class="form-group">
+              <label>Disponible</label>
+              <select [(ngModel)]="p.available"><option [ngValue]="true">Sí</option><option [ngValue]="false">No</option></select>
+            </div>
+            <div class="form-group"><label>Texto disponibilidad</label><input type="text" [(ngModel)]="p.availableText" /></div>
+          </div>
+          <div class="form-group mt-4"><label>Resumen (Summary)</label><textarea rows="4" [(ngModel)]="p.summary"></textarea></div>
+          <button class="btn-save" (click)="saveProfile()" [disabled]="profileSaving()">{{ profileSaving() ? 'Guardando...' : 'Guardar Cambios' }}</button>
+          @if (profileSaveMsg()) { <p class="save-msg">{{ profileSaveMsg() }}</p> }
+        </section>
+        <section class="col-preview">
+          <h2 class="section-title">Vista previa</h2>
+          <p class="preview-hint">Así se verá en tu portafolio</p>
+          <app-vista-previa [profile]="p" [apiImagesUrl]="apiImagesUrl" />
+        </section>
+      </main>
+    }
+  }
+
+  <!-- ─── SKILLS ─── -->
+  @if (activeSection() === 'skills') {
+    <main class="admin-main">
+      <section class="section">
+        <h2 class="section-title">Skills</h2>
+        <div class="skill-form">
+          <input type="text" placeholder="Nombre de la skill" [ngModel]="newSkill().name" (ngModelChange)="newSkill.set({...newSkill(), name: $event})" class="skill-input" />
+          <select [ngModel]="newSkill().skillType" (ngModelChange)="newSkill.set({...newSkill(), skillType: $event})" class="skill-select">
+            @for (t of skillTypes; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+          <input type="text" placeholder="Descripción (opcional)" [ngModel]="newSkill().description" (ngModelChange)="newSkill.set({...newSkill(), description: $event})" class="skill-desc" />
+          <button class="btn-save text-sm" (click)="createSkill()" [disabled]="skillSaving()">{{ skillSaving() ? '...' : '+ Crear' }}</button>
+        </div>
+        @if (skillSaveMsg()) { <p class="save-msg text-sm mt-2">{{ skillSaveMsg() }}</p> }
+        @if (skillsLoading()) { <p class="text-gray-400 mt-4">Cargando skills...</p> }
+        @else if (skillsError()) { <p class="text-red-400 mt-4">{{ skillsError() }}</p> }
+        @else {
+          <div class="skill-list mt-4">
+            @for (skill of skills(); track skill.id) {
+              <div class="skill-item" [class.skill-inactive]="!skill.isActive">
+                <div class="skill-info">
+                  <span class="skill-name">{{ skill.name }}</span>
+                  <span class="skill-type">{{ skill.skillType }}</span>
+                  @if (skill.description) { <span class="skill-desc-text">{{ skill.description }}</span> }
+                </div>
+                <div class="skill-actions">
+                  <button class="btn-sm" (click)="toggleSkillActive(skill)">{{ skill.isActive ? 'Desactivar' : 'Activar' }}</button>
+                  <button class="btn-sm" (click)="editSkill(skill)">Editar</button>
+                  <button class="btn-sm btn-danger" (click)="deleteSkill(skill)">Eliminar</button>
+                </div>
+              </div>
+              @if (skillEditId() === skill.id) {
+                <div class="skill-edit">
+                  <input type="text" [ngModel]="skill.name" />
+                  <select [ngModel]="skill.skillType">
+                    @for (t of skillTypes; track t) { <option [value]="t">{{ t }}</option> }
+                  </select>
+                  <input type="text" [ngModel]="skill.description" placeholder="Descripción" />
+                  <button class="btn-save text-sm" (click)="saveSkillEdit(skill)">Guardar</button>
+                </div>
+              }
+            }
+          </div>
+        }
+      </section>
+    </main>
+  }
+
+  <!-- ─── PROJECTS ─── -->
+  @if (activeSection() === 'projects') {
+    <main class="admin-main"><section class="section"><h2 class="section-title">Projects</h2><p class="text-gray-400">Próximamente...</p></section></main>
+  }
+
+  <!-- ─── SETTINGS ─── -->
+  @if (activeSection() === 'settings') {
+    <main class="admin-main"><section class="section"><h2 class="section-title">Settings</h2><p class="text-gray-400">Próximamente...</p></section></main>
+  }
 </div>

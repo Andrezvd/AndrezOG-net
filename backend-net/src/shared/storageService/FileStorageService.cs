@@ -44,14 +44,12 @@ public class FileStorageService
         var uploadDir = Path.Combine(_basePath, "uploads", subfolder);
         Directory.CreateDirectory(uploadDir);
 
-        var safeName = Path.GetFileNameWithoutExtension(file.FileName)
-        .Replace(" ", "_").ToLowerInvariant();
-        var uniqueName = $"{Guid.NewGuid()}_{safeName}{extension}";
+        var uniqueName = $"{Guid.NewGuid()}{extension}";
 
         var fullPath = Path.Combine(uploadDir, uniqueName);
         await using var stream = new FileStream(fullPath, FileMode.Create);
         await file.CopyToAsync(stream);
-        return $"/uploads/{subfolder}/{uniqueName}";
+        return $"{subfolder}/{uniqueName}";
     }
 
         /// <summary>
@@ -59,14 +57,16 @@ public class FileStorageService
         /// </summary>
         /// <param name="relativePath">Ruta relativa del archivo a eliminar.</param>
         
-    public void DeleteFile(string? publicPath)
+    public void DeleteFile(string? fileName, string subfolder)
     {
-        if (string.IsNullOrWhiteSpace(publicPath))
+        if (string.IsNullOrWhiteSpace(fileName))
         {
-            return ;    
+            return;
         }
 
-        var fullPath = Path.Combine(_basePath, publicPath.TrimStart('/'));
+        // Extraer solo el nombre del archivo por si viene con path completo (compatibilidad hacia atrás)
+        var name = Path.GetFileName(fileName);
+        var fullPath = Path.Combine(_basePath, "uploads", subfolder, name);
 
         if (File.Exists(fullPath))
         {

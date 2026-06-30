@@ -6,6 +6,6 @@ public interface IProfileService
 {
     Task CreateDefaultProfileAsync(CreateDefaultProfileCommand command);
     Task UpdateProfileAsync(UpdateProfileCommand command);
-    Task<Profile?> GetMyProfileAsync();
+    Task<Profile?> GetByUserIdAsync(int userId);
     Task<Profile?> GetPublicProfileAsync();
 }
