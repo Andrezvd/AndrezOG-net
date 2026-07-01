@@ -25,12 +25,11 @@
 
       <div class="auth-divider"><span>o continúa con</span></div>
 
-      <!-- Botón Google renderizado por GIS, oculto -->
-      <div id="googleHiddenBtn" style="display:none;"></div>
-
-      <button type="button" class="btn-google" (click)="googleLogin()">
-        <span class="google-icon">G</span> Google
-      </button>
+      <div
+        #googleHost
+        data-google-host="login"
+        class="gsi-host"
+      ></div>
 
       <p class="auth-link">
         ¿No tienes una cuenta? <a routerLink="/register">Regístrate</a>

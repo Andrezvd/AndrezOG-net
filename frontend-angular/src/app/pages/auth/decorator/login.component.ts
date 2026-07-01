@@ -1,9 +1,9 @@
-import { Component, AfterViewInit, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, afterNextRender, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../api/auth.service';
 import { LoginRequest } from '../types/auth.types';
-import { environment } from '../../../../environments/environment.development';
+import { GoogleIdentityService } from '../../../services/google-identity.service';
 
 @Component({
   selector: 'app-login',
@@ -11,15 +11,18 @@ import { environment } from '../../../../environments/environment.development';
   styleUrls: ['../css/login.component.css'],
   imports: [FormsModule, RouterLink]
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent {
   credentials: LoginRequest = { email: '', password: '' };
   errorMessage = signal<string | null>(null);
   isLoading = signal<boolean>(false);
+  @ViewChild('googleHost') googleHost?: ElementRef<HTMLElement>;
 
-  constructor(private authService: AuthService, private router: Router) { }
-
-  ngAfterViewInit(): void {
-    this.initGoogleButton();
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private googleIdentity: GoogleIdentityService
+  ) {
+    afterNextRender(() => this.initGoogleButton());
   }
 
   onSubmit() {
@@ -32,28 +35,10 @@ export class LoginComponent implements AfterViewInit {
   }
 
   initGoogleButton(): void {
-    // @ts-ignore
-    if (typeof google === 'undefined' || !google?.accounts) return;
-    // @ts-ignore
-    google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response: any) => this.handleGoogleResponse(response),
-      ux_mode: 'popup'
-    });
-    // @ts-ignore
-    google.accounts.id.renderButton(
-      document.getElementById('googleHiddenBtn'),
-      { theme: 'outline', size: 'large', width: 300 }
-    );
-  }
+    const ready = this.googleIdentity.init((response: any) => this.handleGoogleResponse(response));
+    if (!ready) return;
 
-  googleLogin(): void {
-    this.errorMessage.set(null);
-    // Simular clic en el botón renderizado de Google (oculto con display:none)
-    const btn = document.querySelector<HTMLElement>('#googleHiddenBtn div[role=button]');
-    if (btn) {
-      btn.click();
-    }
+    this.googleIdentity.renderButton(this.googleHost?.nativeElement ?? null);
   }
 
   handleGoogleResponse(response: any): void {

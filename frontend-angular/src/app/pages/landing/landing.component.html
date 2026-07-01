@@ -133,12 +133,41 @@
               </p>
             </div>
 
-            <!-- Skills (placeholder) -->
+            <!-- Skills -->
             <div class="w-full">
-              <p class="text-xs uppercase tracking-wider mb-1" style="color: rgba(31, 31, 31, 0.6);">Skills</p>
-              <div class="border border-dashed rounded-lg p-3 text-sm text-center" style="border-color: rgba(31, 31, 31, 0.2); color: rgba(31, 31, 31, 0.5);">
-                Skills coming soon...
-              </div>
+              <p class="text-xs uppercase tracking-wider mb-2" style="color: rgba(31, 31, 31, 0.6);">Skills</p>
+              @if (skills.length > 0) {
+                <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                  @for (skill of skills; track skill.name) {
+                    <div class="relative group flex flex-col items-center">
+                      @if (skill.imageUrl) {
+                        <img
+                          [src]="apiImagesUrl + skill.imageUrl"
+                          [alt]="skill.name"
+                          class="w-10 h-10 rounded-full object-cover shadow-md cursor-pointer transition-transform duration-200 group-hover:scale-110"
+                          style="border: 2px solid #C7A44B;"
+                        />
+                      } @else {
+                        <div
+                          class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shadow-md cursor-pointer transition-transform duration-200 group-hover:scale-110"
+                          style="background: rgba(31, 31, 31, 0.75); border: 2px solid #C7A44B; color: #C7A44B;">
+                          {{ skill.name.charAt(0) }}
+                        </div>
+                      }
+                      <!-- Tooltip con nombre en mouseover -->
+                      <span
+                        class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                        style="background: rgba(31, 31, 31, 0.9); color: #C7A44B;">
+                        {{ skill.name }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="border border-dashed rounded-lg p-3 text-sm text-center" style="border-color: rgba(31, 31, 31, 0.2); color: rgba(31, 31, 31, 0.5);">
+                  Skills coming soon...
+                </div>
+              }
             </div>
 
           </div>
@@ -183,25 +212,6 @@
         </div>
 
       }
-    </section>
-
-    <!-- Info Grid (Focus / Style / Goal) -->
-    <section class="info-grid" id="about">
-      <article>
-        <span>01</span>
-        <h2>Focus</h2>
-        <p>Build clean interfaces, solid APIs and playful experiences with a modern stack.</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h2>Style</h2>
-        <p>Minimal layout, strong contrast and a cinematic hero that keeps the attention on the message.</p>
-      </article>
-      <article>
-        <span>03</span>
-        <h2>Goal</h2>
-        <p>A landing page that introduces the portfolio before the rest of the app content.</p>
-      </article>
     </section>
 
     <!-- Footer -->
