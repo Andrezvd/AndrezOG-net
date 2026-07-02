@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────────────
+# AndrezOG — Smoke Test Action
+# Acción reusable que verifica que un endpoint HTTP responda 200 OK.
+# Útil para validar healthchecks en CI y, en el futuro, en CD contra
+# entornos de staging o producción.
+# ─────────────────────────────────────────────────────────────────────
+
+name: "Smoke Test"
+description: "Verifica que un endpoint HTTP responda con el código esperado."
+
+inputs:
+  url:
+    description: "URL del endpoint a testear (ej: http://localhost:8080/health)"
+    required: true
+  expected_status:
+    description: "Código HTTP esperado (default: 200)"
+    required: false
+    default: "200"
+  timeout_seconds:
+    description: "Tiempo máximo de espera para la respuesta en segundos"
+    required: false
+    default: "30"
+  max_retries:
+    description: "Número máximo de reintentos antes de fallar"
+    required: false
+    default: "6"
+  retry_delay_seconds:
+    description: "Segundos de espera entre reintentos"
+    required: false
+    default: "10"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Smoke test → ${{ inputs.url }}"
+      shell: bash
+      run: |
+        set -e
+
+        URL="${{ inputs.url }}"
+        EXPECTED="${{ inputs.expected_status }}"
+        TIMEOUT="${{ inputs.timeout_seconds }}"
+        MAX_RETRIES="${{ inputs.max_retries }}"
+        RETRY_DELAY="${{ inputs.retry_delay_seconds }}"
+
+        echo "🔍 Smoke test iniciado para: $URL"
+        echo "   Esperando código : $EXPECTED"
+        echo "   Timeout por intento: ${TIMEOUT}s"
+        echo "   Reintentos máximos : $MAX_RETRIES"
+        echo ""
+
+        for i in $(seq 1 "$MAX_RETRIES"); do
+          echo "── Intento $i de $MAX_RETRIES ──"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time "$TIMEOUT" \
+            "$URL" 2>/dev/null || echo "000")
+
+          if [ "$HTTP_CODE" = "$EXPECTED" ]; then
+            echo "✅ Smoke test pasado — respuesta $HTTP_CODE"
+            exit 0
+          fi
+
+          echo "   Respuesta: $HTTP_CODE (esperado: $EXPECTED)"
+
+          if [ "$i" -lt "$MAX_RETRIES" ]; then
+            echo "   Reintentando en ${RETRY_DELAY}s..."
+            sleep "$RETRY_DELAY"
+          fi
+        done
+
+        echo "❌ Smoke test falló después de $MAX_RETRIES intentos."
+        echo "   URL: $URL"
+        echo "   Último código recibido: $HTTP_CODE"
+        exit 1

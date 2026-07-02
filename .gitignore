@@ -53,3 +53,8 @@ coverage/
 
 # Migrations
 /backend-net/Migrations/
+
+
+# ─── OTHERS ───
+
+AGENT.MD

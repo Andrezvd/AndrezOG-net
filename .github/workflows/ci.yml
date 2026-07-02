@@ -1,0 +1,237 @@
+# ─────────────────────────────────────────────────────────────────────
+# AndrezOG — Continuous Integration
+# Se ejecuta en cada push y pull request sobre ramas principales.
+# Valida backend, frontend, imágenes Docker y ejecuta smoke tests
+# contra la infraestructura completa levantada con Docker Compose.
+#
+# Principios:
+#   - KISS: jobs independientes, steps auto-contenidos
+#   - Fallo rápido: cualquier error detiene el job inmediatamente
+#   - Seguridad: mínimos permisos, secrets nunca expuestos en log
+#   - Preparado para escalar: estructura para añadir tests, escaneo,
+#     quality gates y publicación en fases posteriores
+# ─────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master]
+
+# Permisos mínimos: solo lectura del contenido del repositorio.
+# jobs específicos pueden solicitar más permisos si es necesario.
+permissions:
+  contents: read
+
+# ─── Variables reutilizadas en varios jobs ────────────────────────
+env:
+  DOTNET_VERSION: "10.0.x"
+  NODE_VERSION: "22.x"
+  PNPM_VERSION: "11"
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════
+  # VALIDATE BACKEND
+  # ═══════════════════════════════════════════════════════════════
+  validate-backend:
+    name: "Validate Backend"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend-net
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup .NET ${{ env.DOTNET_VERSION }}"
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: "Cache NuGet packages"
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/backend-net.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: "Restore dependencies"
+        run: dotnet restore
+
+      - name: "Build"
+        run: dotnet build --no-restore --configuration Release
+
+      - name: "Publish (Release)"
+        run: dotnet publish --no-restore --configuration Release --output ./publish /p:UseAppHost=false
+
+  # ═══════════════════════════════════════════════════════════════
+  # VALIDATE FRONTEND
+  # ═══════════════════════════════════════════════════════════════
+  validate-frontend:
+    name: "Validate Frontend"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend-angular
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup Node.js ${{ env.NODE_VERSION }}"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "Setup pnpm"
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: "Get pnpm store directory"
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: "Cache pnpm store"
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: "Install dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "Build"
+        run: pnpm build
+
+  # ═══════════════════════════════════════════════════════════════
+  # DOCKER COMPOSE VALIDATION & INTEGRATION TEST
+  # ═══════════════════════════════════════════════════════════════
+  # Combina validación y smoke tests en un solo job porque GitHub
+  # Actions ejecuta cada job en una VM limpia. Si separásemos build
+  # de test, habría que reconstruir las imágenes en el job de
+  # integración, duplicando tiempo y recursos.
+  # Si en el futuro se usa un runner compartido o artefactos Docker,
+  # se podría dividir para acelerar el pipeline.
+  integration-test:
+    name: "Integration Tests"
+    runs-on: ubuntu-latest
+    needs: [validate-backend, validate-frontend]
+
+    # Variables de entorno simuladas para el entorno CI.
+    # No son secretos reales, solo valores de prueba para validar
+    # que la infraestructura arranca correctamente.
+    env:
+      POSTGRES_DB: andrezog_ci
+      POSTGRES_USER: ci_user
+      POSTGRES_PASSWORD: ci_pass_test
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Create CI configuration files"
+        shell: bash
+        run: |
+          # ── appsettings.Development.json ──────────────────────
+          # Necesario porque docker-compose.yml monta este archivo
+          # como volumen. En CI no existe (está en .gitignore), así
+          # que lo creamos con valores funcionales mínimos.
+          cat > backend-net/appsettings.Development.json << 'EOF'
+          {
+            "Logging": {
+              "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+              }
+            },
+            "ConnectionStrings": {
+              "DefaultConnection": ""
+            },
+            "Jwt": {
+              "Key": "CI-Temporary-Key-That-Is-At-Least-32-Characters!",
+              "Issuer": "AndrezOG-CI",
+              "Audience": "AndrezOG-CI-Client",
+              "ExpireMinutes": "60"
+            },
+            "Google": {
+              "ClientId": "",
+              "ClientSecret": "",
+              "RedirectUri": ""
+            },
+            "AdminEmails": [""]
+          }
+          EOF
+          echo "✅ appsettings.Development.json creado para CI"
+
+      - name: "Validate docker-compose configuration"
+        run: docker compose config
+
+      - name: "Build Docker images"
+        run: docker compose build --parallel
+
+      - name: "Verify images were created"
+        run: |
+          echo "📦 Imágenes construidas:"
+          docker compose images
+
+      - name: "Start infrastructure"
+        run: |
+          docker compose up --wait --wait-timeout 180
+          echo ""
+          echo "📋 Estado de los servicios:"
+          docker compose ps
+
+      - name: "Smoke test — Backend health endpoint"
+        uses: ./.github/actions/smoke-test
+        with:
+          url: "http://localhost:5201/health"
+          expected_status: "200"
+          max_retries: "12"
+          retry_delay_seconds: "10"
+
+      - name: "Smoke test — Frontend health endpoint"
+        uses: ./.github/actions/smoke-test
+        with:
+          url: "http://localhost:4200/health"
+          expected_status: "200"
+          max_retries: "12"
+          retry_delay_seconds: "10"
+
+      - name: "Smoke test — Frontend serves HTML"
+        uses: ./.github/actions/smoke-test
+        with:
+          url: "http://localhost:4200"
+          expected_status: "200"
+          max_retries: "6"
+          retry_delay_seconds: "10"
+
+      - name: "Display service logs on failure"
+        if: failure()
+        shell: bash
+        run: |
+          echo "📜 Logs del backend:"
+          docker compose logs backend --tail 50 2>/dev/null || true
+          echo ""
+          echo "📜 Logs del frontend:"
+          docker compose logs frontend --tail 50 2>/dev/null || true
+          echo ""
+          echo "📜 Logs de postgres:"
+          docker compose logs postgres --tail 20 2>/dev/null || true
+
+      - name: "Cleanup — stop and remove all containers"
+        if: always()
+        shell: bash
+        run: |
+          echo "🧹 Limpiando contenedores y volúmenes de CI..."
+          docker compose down --volumes --remove-orphans --timeout 30
+          echo "✅ Limpieza completada"

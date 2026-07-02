@@ -1,0 +1,90 @@
+# ─────────────────────────────────────────────────────────────
+# AndrezOG — Docker Compose Development
+# Orquesta los servicios para el entorno de desarrollo local
+# ─────────────────────────────────────────────────────────────
+
+services:
+  # ─── Base de datos ────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: andrezog-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - andrezog-network
+
+  # ─── Backend API .NET 10 ─────────────────────────────────
+  backend:
+    build:
+      context: ./backend-net
+      dockerfile: Dockerfile
+    container_name: andrezog-backend
+    restart: unless-stopped
+    ports:
+      - "5201:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend-net/appsettings.Development.json:/app/appsettings.Development.json:ro
+      - backend_uploads:/app/wwwroot/uploads
+    networks:
+      - andrezog-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ─── Frontend Angular SSR ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend-angular
+      dockerfile: Dockerfile
+    container_name: andrezog-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:4000"
+    environment:
+      PORT: "4000"
+      BACKEND_BASE_URL: http://backend:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - andrezog-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  postgres_data:
+    name: andrezog_postgres_data
+  backend_uploads:
+    name: andrezog_backend_uploads
+
+networks:
+  andrezog-network:
+    name: andrezog-network
+    driver: bridge
