@@ -15,7 +15,6 @@ using AndrezOG.Shared.StorageService;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -40,8 +39,7 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsqlOptions =>
-        npgsqlOptions.MapEnum<SkillType>("skill_type")));
+    options.UseNpgsql(connectionString));
 
 // File Storage (singleton: una instancia para toda la app)
 var webRootPath = builder.Environment.WebRootPath
@@ -114,6 +112,7 @@ app.UseCors("AllowFrontendDev");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapControllers();
 
 app.Run();

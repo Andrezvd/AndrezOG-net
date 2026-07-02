@@ -17,7 +17,8 @@ public class SkillConfiguration : IEntityTypeConfiguration<Skill>
         entity.Property(e => e.SkillType)
             .IsRequired()
             .HasColumnName("type_skill")
-            .HasColumnType("skill_type");
+            .HasConversion<string>()
+            .HasMaxLength(50);
 
         entity.Property(e => e.IsActive).IsRequired().HasColumnName("is_active");
         entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(200).HasColumnName("image_url");

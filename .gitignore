@@ -1,8 +1,55 @@
-# VARIABLES
+# ─── VARIABLES Y SECRETOS ───
 /backend-net/appsettings.Development.json
+.env
+.env.local
+.env.*.local
+
+# ─── .NET ───
 /backend-net/bin
 /backend-net/obj
 /backend-net/Migrations
 /backend-net/wwwroot/
-# composer variables
+
+# ─── Angular ───
+frontend-angular/node_modules/
+frontend-angular/dist/
+frontend-angular/.angular/
+frontend-angular/tmp/
+
+# ─── React ───
+frontend-react/node_modules/
+frontend-react/dist/
+frontend-react/build/
+
+# ─── Docker ───
 docker-compose.local.yml
+docker-compose.override.yml
+
+# ─── IDE ───
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.ide
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── LOGS ───
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── TESTS ───
+coverage/
+*.trx
+*.coverage
+
+# Migrations
+/backend-net/Migrations/

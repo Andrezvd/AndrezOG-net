@@ -241,7 +241,8 @@ namespace backend_net.Migrations
 
                     b.Property<string>("SkillType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("type_skill");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -509,24 +510,28 @@ namespace backend_net.Migrations
                         .HasColumnName("email");
 
                     b.Property<string>("EmailVerificationToken")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("email_verification_token");
 
                     b.Property<bool>("EmailVerified")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_verified");
 
                     b.Property<string>("ExternalId")
                         .HasColumnType("text")
                         .HasColumnName("external_id");
 
                     b.Property<int>("FailedAttempts")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_attempts");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
                     b.Property<DateTime?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lockout_end");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -538,18 +543,22 @@ namespace backend_net.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
 
-                    b.Property<int>("Provider")
-                        .HasColumnType("integer")
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("provider");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token");
 
                     b.Property<DateTime?>("RefreshTokenExpires")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("refresh_token_expires");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer")
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("role");
 
                     b.Property<bool>("TwoFactorEnabled")
