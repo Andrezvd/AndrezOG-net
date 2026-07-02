@@ -184,12 +184,23 @@ jobs:
           echo "📦 Imágenes construidas:"
           docker compose images
 
-      - name: "Start infrastructure"
+      - name: "Start infrastructure (without wait)"
         run: |
-          docker compose up --wait --wait-timeout 180
+          docker compose up -d
+          echo "⏳ Esperando 30s para que los servicios arranquen..."
+          sleep 30
           echo ""
           echo "📋 Estado de los servicios:"
           docker compose ps
+
+      - name: "Debug — Show frontend logs"
+        shell: bash
+        run: |
+          echo "📜 Logs completos del frontend:"
+          docker compose logs frontend 2>/dev/null || echo "No logs available"
+          echo ""
+          echo "📜 Logs del backend:"
+          docker compose logs backend --tail 30 2>/dev/null || echo "No logs available"
 
       - name: "Smoke test — Backend health endpoint"
         uses: ./.github/actions/smoke-test
@@ -204,7 +215,7 @@ jobs:
         with:
           url: "http://localhost:4200/health"
           expected_status: "200"
-          max_retries: "12"
+          max_retries: "6"
           retry_delay_seconds: "10"
 
       - name: "Smoke test — Frontend serves HTML"
@@ -214,19 +225,6 @@ jobs:
           expected_status: "200"
           max_retries: "6"
           retry_delay_seconds: "10"
-
-      - name: "Display service logs on failure"
-        if: failure()
-        shell: bash
-        run: |
-          echo "📜 Logs del backend:"
-          docker compose logs backend --tail 50 2>/dev/null || true
-          echo ""
-          echo "📜 Logs del frontend:"
-          docker compose logs frontend --tail 50 2>/dev/null || true
-          echo ""
-          echo "📜 Logs de postgres:"
-          docker compose logs postgres --tail 20 2>/dev/null || true
 
       - name: "Cleanup — stop and remove all containers"
         if: always()
