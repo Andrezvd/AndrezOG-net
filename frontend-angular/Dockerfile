@@ -27,6 +27,9 @@ ENV NODE_ENV=production
 # Copiar solo lo necesario desde la etapa de build
 COPY --from=build /app/dist/frontend-angular ./dist
 
+# Copiar healthcheck (compatible con distroless: sin shell, sin curl/wget)
+COPY healthcheck.mjs ./
+
 # Puerto del servidor SSR
 EXPOSE 4000
 
