@@ -28,6 +28,7 @@ services:
 
   # ─── Backend API .NET 10 ─────────────────────────────────
   backend:
+    image: ghcr.io/andrezvd/andrezog-net/backend:latest
     build:
       context: ./backend-net
       dockerfile: Dockerfile
@@ -56,6 +57,7 @@ services:
 
   # ─── Frontend Angular SSR ────────────────────────────────
   frontend:
+    image: ghcr.io/andrezvd/andrezog-net/frontend:latest
     build:
       context: ./frontend-angular
       dockerfile: Dockerfile
