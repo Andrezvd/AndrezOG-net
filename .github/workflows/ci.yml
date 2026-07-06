@@ -155,25 +155,6 @@ jobs:
           echo "📦 Imágenes construidas:"
           docker compose images
 
-      - name: "Diagnose backend crash"
-        shell: bash
-        run: |
-          echo "🔍 Building backend image..."
-          docker build -t backend-diag ./backend-net
-
-          echo ""
-          echo "🔍 Running backend container to capture crash output..."
-          docker run --rm \
-            --name backend-diag \
-            -e ASPNETCORE_ENVIRONMENT=Development \
-            -e ASPNETCORE_HTTP_PORTS=8080 \
-            backend-diag \
-            2>&1 || true
-
-          echo ""
-          echo "--- Container exited. Checking published files: ---"
-          docker run --rm --entrypoint ls backend-diag -la /app/ 2>&1 | head -30
-
       - name: "Start infrastructure"
         shell: bash
         run: |

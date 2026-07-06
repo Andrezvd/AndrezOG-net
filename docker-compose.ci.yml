@@ -29,6 +29,8 @@ services:
       start_period: 10s
 
   # ─── Backend API .NET 10 ─────────────────────────────────
+  # NOTA: Los valores Jwt y Google son ficticios para CI.
+  # No son secretos reales, solo permiten que la app arranque.
   backend:
     build:
       context: ./backend-net
@@ -42,6 +44,14 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: "8080"
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=andrezog_ci;Username=ci_user;Password=ci_pass_test"
+      Jwt__Key: "CI-Temporary-Key-That-Is-At-Least-32-Characters!"
+      Jwt__Issuer: "AndrezOG-CI"
+      Jwt__Audience: "AndrezOG-CI-Client"
+      Jwt__ExpireMinutes: "60"
+      Google__ClientId: ""
+      Google__ClientSecret: ""
+      Google__RedirectUri: ""
+      AdminEmails__0: ""
     depends_on:
       postgres:
         condition: service_healthy
