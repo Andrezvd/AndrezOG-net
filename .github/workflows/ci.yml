@@ -16,9 +16,17 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches:
+      - master
+      - develop
+      - feature/**
+      - release/**
+      - hotfix/**
   pull_request:
-    branches: [master]
+    branches:
+      - master
+      - develop
+      - release/**
 
 # Permisos mínimos: solo lectura del contenido del repositorio.
 # jobs específicos pueden solicitar más permisos si es necesario.
