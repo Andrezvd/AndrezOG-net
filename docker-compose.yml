@@ -1,6 +1,12 @@
 # ─────────────────────────────────────────────────────────────
 # AndrezOG — Docker Compose Development
-# Orquesta los servicios para el entorno de desarrollo local
+# Entorno de desarrollo local.
+# Características:
+#   - Puertos expuestos para acceso desde localhost
+#   - Volúmenes persistentes para BD y uploads
+#   - appsettings.Development.json montado para hot-reload
+#   - CORS abierto para frontends en localhost
+#   - Variables desde .env (no incluir en repositorio)
 # ─────────────────────────────────────────────────────────────
 
 services:
@@ -44,6 +50,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
+      # Montar config de desarrollo local (NO incluir en repositorio)
       - ./backend-net/appsettings.Development.json:/app/appsettings.Development.json:ro
       - backend_uploads:/app/wwwroot/uploads
     networks:

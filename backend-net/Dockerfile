@@ -18,6 +18,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 ENV ASPNETCORE_HTTP_PORTS=8080
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 # Instalar curl para healthchecks (útil para Docker)
 RUN apt-get update \
@@ -28,17 +29,12 @@ RUN apt-get update \
 COPY --from=build /app/publish .
 
 # ─── Estructura de uploads con permisos ─────────────────────
-# Se crea el directorio base para que el volumen Docker herede
-# los permisos correctos del usuario 'app' (UID 1654) si se
-# monta por primera vez. Si el volumen ya existe, el entrypoint
-# corrige los permisos en cada arranque.
+# Crea el directorio base con permisos para el usuario 'app'
+# (UID 1654). Para volúmenes existentes con permisos incorrectos,
+# ejecutar: docker run --rm -v uploads:/data alpine chown -R 1654:1654 /data
 RUN mkdir -p /app/wwwroot/uploads && chown -R 1654:1654 /app/wwwroot/uploads
 
 # Puerto que usará la API dentro del contenedor
 EXPOSE 8080
 
-# Copiar entrypoint que asegura permisos de uploads en cada inicio
-COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["dotnet", "backend-net.dll"]
