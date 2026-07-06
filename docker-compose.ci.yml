@@ -1,0 +1,76 @@
+# ─────────────────────────────────────────────────────────────
+# AndrezOG — Docker Compose CI (Testing)
+# Entorno para GitHub Actions.
+# NO usar en desarrollo local ni en producción.
+#
+# Diferencias con docker-compose.yml (development):
+#   - Sin puertos expuestos (GitHub Actions no los necesita)
+#   - Sin volúmenes persistentes (se destruyen post-ejecución)
+#   - Sin appsettings.Development.json (generado en CI)
+#   - restart: no (los contenedores se levantan y destruyen)
+#   - Credenciales inline para CI (no dependen de .env)
+# ─────────────────────────────────────────────────────────────
+
+services:
+  # ─── Base de datos ────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: andrezog-postgres
+    restart: no
+    environment:
+      POSTGRES_DB: andrezog_ci
+      POSTGRES_USER: ci_user
+      POSTGRES_PASSWORD: ci_pass_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ci_user -d andrezog_ci"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ─── Backend API .NET 10 ─────────────────────────────────
+  backend:
+    build:
+      context: ./backend-net
+      dockerfile: Dockerfile
+    image: backend-ci:latest
+    container_name: andrezog-backend
+    restart: no
+    ports:
+      - "5201:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=andrezog_ci;Username=ci_user;Password=ci_pass_test"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # ─── Frontend Angular SSR ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend-angular
+      dockerfile: Dockerfile
+    image: frontend-ci:latest
+    container_name: andrezog-frontend
+    restart: no
+    ports:
+      - "4200:4000"
+    environment:
+      PORT: "4000"
+      BACKEND_BASE_URL: http://backend:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "/app/healthcheck.mjs"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 15s
