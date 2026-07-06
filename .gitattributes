@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────
+# AndrezOG — Git Attributes
+# Fuerza formato Unix (LF) para archivos que deben ejecutarse
+# en contenedores Linux, evitando errores como exit 139 (SIGSEGV)
+# causados por saltos de línea Windows (CRLF) en scripts shell.
+# ─────────────────────────────────────────────────────────────
+
+# Scripts shell → siempre LF (Unix), nunca CRLF
+*.sh          text eol=lf
+
+# Dockerfiles → siempre LF
+Dockerfile    text eol=lf
+*.dockerfile  text eol=lf
+
+# Archivos de texto comunes → conversión automática según SO
+*.md          text
+*.yml         text
+*.yaml        text
+*.json        text
+*.cs          text
+*.csproj      text
+*.sln         text
+*.ts          text
+*.html        text
+*.css         text
+
+# Binarios → no modificar
+*.png         binary
+*.jpg         binary
+*.ico         binary
+*.svg         binary
