@@ -116,13 +116,22 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapControllers();
 
 // ── Aplicar migrations automáticamente en producción ──────
-// Crea las tablas si no existen al iniciar la aplicación.
-// Seguro para múltiples instancias (no lockea).
-if (app.Environment.IsProduction())
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-}
+// Temporalmente comentado para diagnosticar SIGABRT en Cloud Run.
+// Si el contenedor arranca sin esto, el problema es la conexión a BD.
+// if (app.Environment.IsProduction())
+// {
+//     using var scope = app.Services.CreateScope();
+//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//     db.Database.Migrate();
+// }
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"FATAL: {ex.GetType().Name}: {ex.Message}");
+    Console.Error.WriteLine(ex.StackTrace);
+    throw;
+}
