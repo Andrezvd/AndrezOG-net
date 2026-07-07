@@ -217,8 +217,8 @@ jobs:
   # PUBLISH DOCKER IMAGES
   # ═══════════════════════════════════════════════════════════════
   # Solo se ejecuta en pushes a master, después de que todos los
-  # tests hayan pasado. Publica las imágenes en GitHub Container
-  # Registry (GHCR).
+  # tests hayan pasado. Publica las imágenes en Artifact Registry
+  # de GCP para que Cloud Run pueda consumirlas.
   #
   # Tags generados:
   #   - latest:      siempre apunta al último commit en master
@@ -232,26 +232,33 @@ jobs:
     # Solo en push a master, no en pull requests
     if: github.event_name == 'push' && github.ref_name == 'master'
 
-    # Permisos necesarios para publicar packages en GHCR
+    # Permisos necesarios para WIF + packages
     permissions:
       contents: read
-      packages: write
+      id-token: write
 
     env:
-      REGISTRY: ghcr.io
-      BACKEND_IMAGE: ghcr.io/andrezvd/andrezog-net/backend
-      FRONTEND_IMAGE: ghcr.io/andrezvd/andrezog-net/frontend
+      REGISTRY: us-central1-docker.pkg.dev
+      BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/backend
+      FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/frontend
 
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
 
-      - name: "Login to GitHub Container Registry"
+      - name: "Authenticate to Google Cloud"
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: "Login to Artifact Registry"
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
       - name: "Build and push Backend"
         uses: docker/build-push-action@v6
@@ -281,5 +288,3 @@ jobs:
           echo "  - ${{ env.BACKEND_IMAGE }}:sha-${{ github.sha }}"
           echo "  - ${{ env.FRONTEND_IMAGE }}:latest"
           echo "  - ${{ env.FRONTEND_IMAGE }}:sha-${{ github.sha }}"
-          echo ""
-          echo "🔗 https://github.com/${{ github.repository }}/pkgs/container/"
