@@ -34,7 +34,7 @@ services:
 
   # ─── Backend API .NET 10 ─────────────────────────────────
   backend:
-    image: us-central1-docker.pkg.dev/andrezog/andrezog-registry/backend:latest
+    image: us-central1-docker.pkg.dev/andrezog/andrezog/backend:latest
     build:
       context: ./backend-net
       dockerfile: Dockerfile
@@ -64,7 +64,7 @@ services:
 
   # ─── Frontend Angular SSR ────────────────────────────────
   frontend:
-    image: us-central1-docker.pkg.dev/andrezog/andrezog-registry/frontend:latest
+    image: us-central1-docker.pkg.dev/andrezog/andrezog/frontend:latest
     build:
       context: ./frontend-angular
       dockerfile: Dockerfile
