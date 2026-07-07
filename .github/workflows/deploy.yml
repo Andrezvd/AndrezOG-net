@@ -22,10 +22,11 @@ permissions:
 env:
   PROJECT_ID: andrezog
   REGION: us-central1
+  REGISTRY: us-central1-docker.pkg.dev
   BACKEND_SERVICE: andrezog-backend
   FRONTEND_SERVICE: andrezog-frontend
-  BACKEND_IMAGE: ghcr.io/andrezvd/andrezog-net/backend
-  FRONTEND_IMAGE: ghcr.io/andrezvd/andrezog-net/frontend
+  BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/backend
+  FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/frontend
   CLOUD_SQL_INSTANCE: andrezog:us-central1:andrez-db
 
 jobs:
@@ -44,13 +45,9 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      # ─── Login a GHCR para bajar las imágenes ──────────────
-      - name: "Login to GitHub Container Registry"
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # ─── Login a Artifact Registry no es necesario ────────
+      # Cloud Run en la misma región accede a Artifact Registry
+      # automáticamente mediante IAM. No necesita credenciales.
 
       # ─── Backend ──────────────────────────────────────────
       - name: "Deploy Backend to Cloud Run"
