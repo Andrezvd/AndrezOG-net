@@ -239,8 +239,8 @@ jobs:
 
     env:
       REGISTRY: us-central1-docker.pkg.dev
-      BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/backend
-      FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/frontend
+      BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog/backend
+      FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog/frontend
 
     steps:
       - name: "Checkout repository"

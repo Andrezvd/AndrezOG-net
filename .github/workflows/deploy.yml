@@ -25,8 +25,8 @@ env:
   REGISTRY: us-central1-docker.pkg.dev
   BACKEND_SERVICE: andrezog-backend
   FRONTEND_SERVICE: andrezog-frontend
-  BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/backend
-  FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog-registry/frontend
+  BACKEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog/backend
+  FRONTEND_IMAGE: us-central1-docker.pkg.dev/andrezog/andrezog/frontend
   CLOUD_SQL_INSTANCE: andrezog:us-central1:andrez-db
 
 jobs:
