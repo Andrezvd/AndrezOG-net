@@ -77,7 +77,6 @@ jobs:
           region: ${{ env.REGION }}
           env_vars: |
             NODE_ENV=production
-            PORT=4000
             BACKEND_BASE_URL=https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app
 
       # ─── Mostrar URLs ─────────────────────────────────────
