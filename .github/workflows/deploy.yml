@@ -21,6 +21,7 @@ permissions:
 
 env:
   PROJECT_ID: andrezog
+  PROJECT_NUMBER: "385625211033"
   REGION: us-central1
   REGISTRY: us-central1-docker.pkg.dev
   BACKEND_SERVICE: andrezog-backend
@@ -56,6 +57,7 @@ jobs:
           service: ${{ env.BACKEND_SERVICE }}
           image: ${{ env.BACKEND_IMAGE }}:sha-${{ github.sha }}
           region: ${{ env.REGION }}
+          flags: --allow-unauthenticated
           env_vars: |
             ASPNETCORE_ENVIRONMENT=Production
             ASPNETCORE_HTTP_PORTS=8080
@@ -75,9 +77,10 @@ jobs:
           service: ${{ env.FRONTEND_SERVICE }}
           image: ${{ env.FRONTEND_IMAGE }}:sha-${{ github.sha }}
           region: ${{ env.REGION }}
+          flags: --allow-unauthenticated
           env_vars: |
             NODE_ENV=production
-            BACKEND_BASE_URL=https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app
+            BACKEND_BASE_URL=https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_NUMBER }}.${{ env.REGION }}.run.app
 
       # ─── Mostrar URLs ─────────────────────────────────────
       - name: "Show deployed URLs"
@@ -86,10 +89,10 @@ jobs:
           echo "✅ Despliegue completado en Cloud Run:"
           echo ""
           echo "   Backend:"
-          echo "   https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app"
+          echo "   https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_NUMBER }}.${{ env.REGION }}.run.app"
           echo ""
           echo "   Frontend:"
-          echo "   https://${{ env.FRONTEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app"
+          echo "   https://${{ env.FRONTEND_SERVICE }}-${{ env.PROJECT_NUMBER }}.${{ env.REGION }}.run.app"
           echo ""
           echo "   Consola GCP:"
           echo "   https://console.cloud.google.com/run?project=${{ env.PROJECT_ID }}"
@@ -98,7 +101,7 @@ jobs:
       - name: "Smoke test — Backend"
         uses: ./.github/actions/smoke-test
         with:
-          url: https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app/health
+          url: https://${{ env.BACKEND_SERVICE }}-${{ env.PROJECT_NUMBER }}.${{ env.REGION }}.run.app/health
           expected_status: "200"
           max_retries: "12"
           retry_delay_seconds: "10"
@@ -106,7 +109,7 @@ jobs:
       - name: "Smoke test — Frontend"
         uses: ./.github/actions/smoke-test
         with:
-          url: https://${{ env.FRONTEND_SERVICE }}-${{ env.PROJECT_ID }}-${{ env.REGION }}.run.app/health
+          url: https://${{ env.FRONTEND_SERVICE }}-${{ env.PROJECT_NUMBER }}.${{ env.REGION }}.run.app/health
           expected_status: "200"
           max_retries: "12"
           retry_delay_seconds: "10"

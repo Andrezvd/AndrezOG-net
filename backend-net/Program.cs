@@ -115,23 +115,7 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapControllers();
 
-// ── Aplicar migrations automáticamente en producción ──────
-// Temporalmente comentado para diagnosticar SIGABRT en Cloud Run.
-// Si el contenedor arranca sin esto, el problema es la conexión a BD.
-// if (app.Environment.IsProduction())
-// {
-//     using var scope = app.Services.CreateScope();
-//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//     db.Database.Migrate();
-// }
-
-try
-{
-    app.Run();
-}
-catch (Exception ex)
-{
-    Console.Error.WriteLine($"FATAL: {ex.GetType().Name}: {ex.Message}");
-    Console.Error.WriteLine(ex.StackTrace);
-    throw;
-}
+// ── Nota: Las migraciones se ejecutan como paso en CI/CD ──
+// Ver .github/workflows/deploy.yml -> "Run EF Core migrations"
+// para evitar timeouts de startup en Cloud Run.
+app.Run();
