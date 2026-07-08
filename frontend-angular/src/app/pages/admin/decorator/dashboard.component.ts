@@ -112,8 +112,7 @@ export class AdminDashboardComponent implements OnInit {
     this.profileSaving.set(true);
     this.profileSaveMsg.set(null);
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const userId = this.authState.state.userId;
-    this.http.patch(`${API_URL}/profile/${userId}`, {
+    this.http.patch(`${API_URL}/profile/me`, {
       name: p.name, lastName: p.lastName, phoneNumber: p.phoneNumber, country: p.country,
       city: p.city, state: p.state, zipCode: p.zipCode, title: p.title,
       summary: p.summary, available: p.available, availableText: p.availableText,

@@ -7,7 +7,6 @@
 # ─── .NET ───
 /backend-net/bin
 /backend-net/obj
-/backend-net/Migrations
 /backend-net/wwwroot/
 
 # ─── Angular ───
@@ -51,10 +50,5 @@ coverage/
 *.trx
 *.coverage
 
-# Migrations
-/backend-net/Migrations/
-
-
 # ─── OTHERS ───
-
 AGENT.MD

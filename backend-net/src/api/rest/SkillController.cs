@@ -7,6 +7,7 @@ using AndrezOG.Application.Iservices;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,6 +28,7 @@ public class SkillController : ControllerBase
     /// Vitrina publica: lista de skills activas con id, name, imageUrl.
     /// </summary>
     [HttpGet("public")]
+    [EnableRateLimiting("public")]
     public async Task<IActionResult> GetPublicSkills()
     {
         var result = await _skillService.GetActiveSkillsAsync();
@@ -46,6 +48,7 @@ public class SkillController : ControllerBase
     /// Retorna la URL de la imagen de una skill por su ID.
     /// </summary>
     [HttpGet("{id:int}/image")]
+    [EnableRateLimiting("public")]
     public async Task<IActionResult> GetSkillImage(int id)
     {
         var result = await _skillService.GetSkillImageByIdAsync(id);

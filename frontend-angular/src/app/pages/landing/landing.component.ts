@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { Observable, of, Subscription } from 'rxjs';
@@ -16,8 +16,10 @@ import { API_URL_IMAGES } from '../../services-conf/api-config';
     templateUrl: './landing.component.html',
     styleUrl: '../../app.css'
 })
-export class LandingComponent implements OnDestroy {
+export class LandingComponent implements OnInit, OnDestroy {
     showPortfolio = false;
+    showOverlay = true;
+    hoverSkip = false;
     menuOpen = false;
     profile$: Observable<MyProfileDto | null> = of(null);
     skills: SkillCardDto[] = [];
@@ -29,8 +31,30 @@ export class LandingComponent implements OnDestroy {
         private skillService: SkillService
     ) { }
 
+    ngOnInit(): void {
+        // Si el usuario ya completo u omitio el juego antes, ir directo al portfolio
+        if (sessionStorage.getItem('andrezog_game_completed') === 'true') {
+            this.showPortfolio = true;
+            this.showOverlay = false;
+            this.loadPortfolioData();
+        }
+    }
+
     onGameWon() {
+        sessionStorage.setItem('andrezog_game_completed', 'true');
         this.showPortfolio = true;
+        this.showOverlay = false;
+        this.loadPortfolioData();
+    }
+
+    skipGame() {
+        sessionStorage.setItem('andrezog_game_completed', 'true');
+        this.showPortfolio = true;
+        this.showOverlay = false;
+        this.loadPortfolioData();
+    }
+
+    private loadPortfolioData() {
         this.profile$ = this.profileService.getPublicProfile().pipe(
             catchError(() => of(null))
         );

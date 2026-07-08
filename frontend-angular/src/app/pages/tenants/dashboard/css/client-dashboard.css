@@ -1,0 +1,64 @@
+.client-dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+    padding: 2rem;
+}
+
+.client-dashboard-card {
+    background: rgba(31, 31, 31, 0.9);
+    border: 1px solid rgba(199, 164, 75, 0.3);
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.card-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+.card-title {
+    font-family: 'Cinzel', 'Playfair Display', serif;
+    color: #C7A44B;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+}
+
+.card-divider {
+    width: 60px;
+    height: 2px;
+    background: #C7A44B;
+    margin: 1rem auto;
+    opacity: 0.5;
+}
+
+.card-message {
+    color: #e0e0e0;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+}
+
+.card-submessage {
+    color: rgba(224, 224, 224, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 2rem;
+}
+
+.card-footer { display: flex; justify-content: center; }
+
+.card-badge {
+    background: rgba(199, 164, 75, 0.15);
+    color: #C7A44B;
+    border: 1px solid rgba(199, 164, 75, 0.3);
+    padding: 0.4rem 1.2rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}

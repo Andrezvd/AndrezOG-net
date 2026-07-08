@@ -8,8 +8,10 @@ using AndrezOG.Domain.Model.Tenant;
 
 using AndrezOG.Infrastructure.ContextDb;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -21,17 +23,23 @@ public class AuthService : IAuthService
     private readonly IProfileRepository _profileRepository;
     private readonly IConfiguration _configuration;
     private readonly AppDbContext _context;
+    private readonly ILogger<AuthService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         IAuthRepository repository,
         IProfileRepository profileRepository,
         IConfiguration configuration,
-        AppDbContext context)
+        AppDbContext context,
+        ILogger<AuthService> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _repository = repository;
         _profileRepository = profileRepository;
         _configuration = configuration;
         _context = context;
+        _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     // ================================================================
@@ -71,6 +79,7 @@ public class AuthService : IAuthService
             Provider = AuthProvider.Local,
             EmailVerified = false,
             EmailVerificationToken = GenerateVerificationToken(),
+            EmailVerificationTokenExpires = DateTime.UtcNow.AddHours(24),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -137,6 +146,7 @@ public class AuthService : IAuthService
                 Provider = AuthProvider.Local,
                 EmailVerified = false,
                 EmailVerificationToken = GenerateVerificationToken(),
+                EmailVerificationTokenExpires = DateTime.UtcNow.AddHours(24),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -225,6 +235,9 @@ public class AuthService : IAuthService
                 user.LockoutEnd = DateTime.UtcNow.AddMinutes(15);
                 user.FailedAttempts = 0;
                 await _repository.UpdateAsync(user);
+                _logger.LogWarning(
+                    "Cuenta bloqueada por 15 min. Email: {Email}, IP: {IP}",
+                    user.Email, GetClientIp());
                 return new AuthResult
                 {
                     Success = false,
@@ -233,6 +246,9 @@ public class AuthService : IAuthService
             }
 
             await _repository.UpdateAsync(user);
+            _logger.LogWarning(
+                "Login fallido. Email: {Email}, Intentos: {Attempts}, IP: {IP}",
+                user.Email, user.FailedAttempts, GetClientIp());
             return new AuthResult
             {
                 Success = false,
@@ -241,6 +257,10 @@ public class AuthService : IAuthService
         }
 
         // Login exitoso
+        _logger.LogInformation(
+            "Login exitoso. UserId: {UserId}, Email: {Email}, Role: {Role}, IP: {IP}",
+            user.Id, user.Email, user.Role, GetClientIp());
+
         user.FailedAttempts = 0;
         user.LockoutEnd = null;
         user.UpdatedAt = DateTime.UtcNow;
@@ -397,6 +417,13 @@ public class AuthService : IAuthService
             };
         }
 
+        // === Rotación segura: invalidar token actual antes de emitir el nuevo ===
+        // 1. Invalidar el token actual inmediatamente (evita ventana de dos tokens válidos)
+        user.RefreshToken = null;
+        user.RefreshTokenExpires = null;
+        await _repository.UpdateAsync(user);
+
+        // 2. Generar y guardar nuevo token
         var newJwt = GenerateJwtToken(user);
         var newRefreshToken = GenerateRefreshToken();
         await SaveRefreshToken(user, newRefreshToken);
@@ -444,8 +471,20 @@ public class AuthService : IAuthService
             };
         }
 
+        // Validar que el token no haya expirado (24 horas)
+        if (user.EmailVerificationTokenExpires.HasValue &&
+            user.EmailVerificationTokenExpires.Value < DateTime.UtcNow)
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Message = "Token de verificación expirado. Solicita uno nuevo."
+            };
+        }
+
         user.EmailVerified = true;
         user.EmailVerificationToken = null;
+        user.EmailVerificationTokenExpires = null;
         user.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdateAsync(user);
 
@@ -479,11 +518,18 @@ public class AuthService : IAuthService
             new(ClaimTypes.Role, user.Role.ToString())
         };
 
+        // Validar que ExpireMinutes sea un número razonable (15 min - 24 horas)
+        var expireMinutes = int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "60");
+        if (expireMinutes < 15 || expireMinutes > 1440)
+        {
+            expireMinutes = 60; // valor por defecto seguro
+        }
+
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"] ?? "AndrezOG",
             audience: _configuration["Jwt:Audience"] ?? "AndrezOG-Client",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "60")),
+            expires: DateTime.UtcNow.AddMinutes(expireMinutes),
             signingCredentials: credentials
         );
 
@@ -517,6 +563,20 @@ public class AuthService : IAuthService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes);
+    }
+
+    private string GetClientIp()
+    {
+        try
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext?.Connection.RemoteIpAddress != null)
+            {
+                return httpContext.Connection.RemoteIpAddress.ToString();
+            }
+        }
+        catch { /* No disponible */ }
+        return "unknown";
     }
 
     private static bool IsPasswordStrong(string password)

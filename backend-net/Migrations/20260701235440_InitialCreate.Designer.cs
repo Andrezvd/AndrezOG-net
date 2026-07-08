@@ -3,6 +3,7 @@ using System;
 using AndrezOG.Infrastructure.ContextDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backend_net.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260701235440_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -512,10 +515,6 @@ namespace backend_net.Migrations
                     b.Property<string>("EmailVerificationToken")
                         .HasColumnType("text")
                         .HasColumnName("email_verification_token");
-
-                    b.Property<DateTime?>("EmailVerificationTokenExpires")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("email_verification_token_expires");
 
                     b.Property<bool>("EmailVerified")
                         .HasColumnType("boolean")
