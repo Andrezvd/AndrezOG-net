@@ -51,15 +51,23 @@ jobs:
       # automáticamente mediante IAM. No necesita credenciales.
 
       # ─── Migraciones de Base de Datos ─────────────────────
-      # Nota: EF Core necesita Jwt variables para inicializar la app,
-      # pero no se pasan secretos reales - se usan valores dummy
-      # porque solo se necesita el connection string para la BD.
+      # Cloud SQL no acepta conexiones directas desde internet.
+      # Usamos Cloud SQL Auth Proxy tunelizado mediante Unix socket.
+      - name: "Start Cloud SQL Auth Proxy"
+        id: sql-proxy
+        uses: google-github-actions/cloud-sql-proxy@v1
+        with:
+          instance: ${{ env.CLOUD_SQL_INSTANCE }}
+          port: 5432
+
       - name: "Run EF Core migrations"
         run: |
           dotnet tool install --global dotnet-ef
           dotnet restore ./backend-net/backend-net.csproj
+          # Reemplazar Host por localhost (el proxy redirige a Cloud SQL)
+          LOCAL_CS=$(echo "${{ secrets.DB_CONNECTION_STRING }}" | sed 's|Host=[^;]*|Host=localhost|')
           dotnet ef database update \
-            --connection "${{ secrets.DB_CONNECTION_STRING }}" \
+            --connection "$LOCAL_CS" \
             --project ./backend-net/backend-net.csproj
         env:
           DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
