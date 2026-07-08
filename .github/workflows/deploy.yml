@@ -54,6 +54,7 @@ jobs:
       - name: "Run EF Core migrations"
         run: |
           dotnet tool install --global dotnet-ef
+          dotnet restore ./backend-net/backend-net.csproj
           dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}" --project ./backend-net/backend-net.csproj
         env:
           DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
