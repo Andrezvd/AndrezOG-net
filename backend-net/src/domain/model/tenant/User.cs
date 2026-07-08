@@ -26,4 +26,5 @@ public class User
     // Email verification
     public bool EmailVerified { get; set; }
     public string? EmailVerificationToken { get; set; }
+    public DateTime? EmailVerificationTokenExpires { get; set; }
 }

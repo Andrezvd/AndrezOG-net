@@ -24,12 +24,17 @@ builder.Services
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-// CORS: permitir requests desde los frontends React (5173) y Angular (4200) en desarrollo
+// CORS: permitir requests desde frontends en desarrollo y producción
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendDev", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:4200")
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "http://localhost:4200",
+            "https://andrezog.com",
+            "https://www.andrezog.com"
+        )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -46,9 +51,16 @@ var webRootPath = builder.Environment.WebRootPath
     ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 builder.Services.AddSingleton(new FileStorageService(webRootPath));
 
-// Rate Limiter para login (previene fuerza bruta)
+// Límite global de cuerpo de request para evitar payloads maliciosos
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB máximo
+});
+
+// Rate Limiter (previene fuerza bruta y abuso)
 builder.Services.AddRateLimiter(options =>
 {
+    // Login: 5 intentos por minuto por IP
     options.AddFixedWindowLimiter("login", config =>
     {
         config.PermitLimit = 5;
@@ -57,8 +69,47 @@ builder.Services.AddRateLimiter(options =>
         config.QueueLimit = 0;
     });
 
+    // Registro: 3 solicitudes por 10 minutos por IP
+    options.AddFixedWindowLimiter("register", config =>
+    {
+        config.PermitLimit = 3;
+        config.Window = TimeSpan.FromMinutes(10);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+
+    // Refresh token: 5 solicitudes por minuto por IP
+    options.AddFixedWindowLimiter("refresh", config =>
+    {
+        config.PermitLimit = 5;
+        config.Window = TimeSpan.FromMinutes(1);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+
+    // Upload de archivos: 10 solicitudes por minuto por IP
+    options.AddFixedWindowLimiter("upload", config =>
+    {
+        config.PermitLimit = 10;
+        config.Window = TimeSpan.FromMinutes(1);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+
+    // Endpoints públicos: 100 solicitudes por minuto por IP
+    options.AddFixedWindowLimiter("public", config =>
+    {
+        config.PermitLimit = 100;
+        config.Window = TimeSpan.FromMinutes(1);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
+
+// IHttpContextAccessor para logging de IP
+builder.Services.AddHttpContextAccessor();
 
 // Repositorios
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -77,6 +128,11 @@ if (string.IsNullOrWhiteSpace(jwtKey))
     throw new InvalidOperationException("Jwt:Key no configurado.");
 }
 
+// Validar longitud mínima del secret JWT (recomendado: al menos 32 bytes para HMAC-SHA256)
+if (Encoding.UTF8.GetBytes(jwtKey).Length < 32)
+{
+    throw new InvalidOperationException("Jwt:Key debe tener al menos 32 caracteres para garantizar seguridad HMAC-SHA256.");
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -89,7 +145,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "AndrezOG",
             ValidAudience = builder.Configuration["Jwt:Audience"] ?? "AndrezOG-Client",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero // Eliminar tolerancia de reloj (default 5 min)
         };
     });
 
@@ -104,6 +161,39 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+// Seguridad HTTP: HSTS solo en produccion (omitir en desarrollo)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+// Headers de seguridad
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    
+    // CSP básica compatible con Angular SSR:
+    // - 'self' para recursos propios
+    // - https: para imágenes desde cualquier fuente HTTPS (Google, etc.)
+    // - 'unsafe-inline' para estilos (requerido por Angular en algunos casos)
+    // - 'unsafe-eval' NO incluido (seguro)
+    context.Response.Headers.Append(
+        "Content-Security-Policy",
+        "default-src 'self'; " +
+        "img-src 'self' data: https:; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "script-src 'self'; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self' https:; " +
+        "frame-src 'self' https://accounts.google.com;"
+    );
+
+    await next();
+});
+
 // Servir archivos estáticos desde wwwroot (imágenes de perfil, skills, etc.)
 app.UseStaticFiles();
 

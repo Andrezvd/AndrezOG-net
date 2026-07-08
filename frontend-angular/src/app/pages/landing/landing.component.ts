@@ -1,4 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { Observable, of, Subscription } from 'rxjs';
@@ -16,8 +17,10 @@ import { API_URL_IMAGES } from '../../services-conf/api-config';
     templateUrl: './landing.component.html',
     styleUrl: '../../app.css'
 })
-export class LandingComponent implements OnDestroy {
+export class LandingComponent implements OnInit, OnDestroy {
     showPortfolio = false;
+    showOverlay = true;
+    hoverSkip = false;
     menuOpen = false;
     profile$: Observable<MyProfileDto | null> = of(null);
     skills: SkillCardDto[] = [];
@@ -25,12 +28,41 @@ export class LandingComponent implements OnDestroy {
     private skillsSub?: Subscription;
 
     constructor(
+        @Inject(PLATFORM_ID) private platformId: object,
         private profileService: ProfileService,
         private skillService: SkillService
     ) { }
 
+    ngOnInit(): void {
+        // Solo acceder a sessionStorage en el navegador (no durante SSR/prerendering)
+        if (isPlatformBrowser(this.platformId)) {
+            if (sessionStorage.getItem('andrezog_game_completed') === 'true') {
+                this.showPortfolio = true;
+                this.showOverlay = false;
+                this.loadPortfolioData();
+            }
+        }
+    }
+
     onGameWon() {
+        if (isPlatformBrowser(this.platformId)) {
+            sessionStorage.setItem('andrezog_game_completed', 'true');
+        }
         this.showPortfolio = true;
+        this.showOverlay = false;
+        this.loadPortfolioData();
+    }
+
+    skipGame() {
+        if (isPlatformBrowser(this.platformId)) {
+            sessionStorage.setItem('andrezog_game_completed', 'true');
+        }
+        this.showPortfolio = true;
+        this.showOverlay = false;
+        this.loadPortfolioData();
+    }
+
+    private loadPortfolioData() {
         this.profile$ = this.profileService.getPublicProfile().pipe(
             catchError(() => of(null))
         );

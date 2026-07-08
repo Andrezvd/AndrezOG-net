@@ -33,6 +33,7 @@ public class AuthController : ControllerBase
     // ================================================================
 
     [HttpPost("register")]
+    [EnableRateLimiting("register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         if (!AuthMappers.PasswordsMatch(request))
@@ -79,6 +80,7 @@ public class AuthController : ControllerBase
     // ================================================================
 
     [HttpPost("external")]
+    [EnableRateLimiting("register")]
     public async Task<ActionResult<AuthResponse>> ExternalLogin([FromBody] ExternalLoginRequest request)
     {
         var command = new ExternalLoginCommand(request.Provider, request.IdToken);
@@ -113,6 +115,7 @@ public class AuthController : ControllerBase
     // ================================================================
 
     [HttpPost("refresh")]
+    [EnableRateLimiting("refresh")]
     public async Task<ActionResult<AuthResponse>> RefreshToken()
     {
         var refreshToken = Request.Cookies["refresh_token"];

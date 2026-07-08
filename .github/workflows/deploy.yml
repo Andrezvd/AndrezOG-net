@@ -50,6 +50,14 @@ jobs:
       # Cloud Run en la misma región accede a Artifact Registry
       # automáticamente mediante IAM. No necesita credenciales.
 
+      # ─── Migraciones de Base de Datos ─────────────────────
+      - name: "Run EF Core migrations"
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}" --project ./backend-net/backend-net.csproj
+        env:
+          DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+
       # ─── Backend ──────────────────────────────────────────
       - name: "Deploy Backend to Cloud Run"
         uses: google-github-actions/deploy-cloudrun@v2

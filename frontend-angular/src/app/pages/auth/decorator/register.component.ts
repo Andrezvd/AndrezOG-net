@@ -60,7 +60,7 @@ export class RegisterComponent {
 
   private navigateByRole(role: string): void {
     if (role === 'Admin') { this.router.navigate(['/admin/dashboard']); }
-    else { this.router.navigate(['/']); }
+    else { this.router.navigate(['/client/dashboard']); }
   }
 }
 

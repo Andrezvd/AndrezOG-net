@@ -28,5 +28,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         entity.Property(e => e.LockoutEnd).HasColumnName("lockout_end");
         entity.Property(e => e.EmailVerified).IsRequired().HasColumnName("email_verified");
         entity.Property(e => e.EmailVerificationToken).HasColumnName("email_verification_token");
+        entity.Property(e => e.EmailVerificationTokenExpires).HasColumnName("email_verification_token_expires");
     }
 }
