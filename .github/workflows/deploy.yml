@@ -51,13 +51,23 @@ jobs:
       # automáticamente mediante IAM. No necesita credenciales.
 
       # ─── Migraciones de Base de Datos ─────────────────────
+      # Nota: EF Core necesita Jwt variables para inicializar la app,
+      # pero no se pasan secretos reales - se usan valores dummy
+      # porque solo se necesita el connection string para la BD.
       - name: "Run EF Core migrations"
         run: |
           dotnet tool install --global dotnet-ef
           dotnet restore ./backend-net/backend-net.csproj
-          dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}" --project ./backend-net/backend-net.csproj
+          dotnet ef database update \
+            --connection "${{ secrets.DB_CONNECTION_STRING }}" \
+            --project ./backend-net/backend-net.csproj
         env:
           DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+          Jwt__Key: "Temporary-Key-For-Migrations-That-Is-At-Least-32-Characters!!"
+          Jwt__Issuer: "AndrezOG"
+          Jwt__Audience: "AndrezOG-Client"
+          Jwt__ExpireMinutes: "60"
+          ASPNETCORE_ENVIRONMENT: "Development"
 
       # ─── Backend ──────────────────────────────────────────
       - name: "Deploy Backend to Cloud Run"
