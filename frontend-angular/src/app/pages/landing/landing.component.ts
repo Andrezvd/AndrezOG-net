@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { Observable, of, Subscription } from 'rxjs';
@@ -27,28 +28,35 @@ export class LandingComponent implements OnInit, OnDestroy {
     private skillsSub?: Subscription;
 
     constructor(
+        @Inject(PLATFORM_ID) private platformId: object,
         private profileService: ProfileService,
         private skillService: SkillService
     ) { }
 
     ngOnInit(): void {
-        // Si el usuario ya completo u omitio el juego antes, ir directo al portfolio
-        if (sessionStorage.getItem('andrezog_game_completed') === 'true') {
-            this.showPortfolio = true;
-            this.showOverlay = false;
-            this.loadPortfolioData();
+        // Solo acceder a sessionStorage en el navegador (no durante SSR/prerendering)
+        if (isPlatformBrowser(this.platformId)) {
+            if (sessionStorage.getItem('andrezog_game_completed') === 'true') {
+                this.showPortfolio = true;
+                this.showOverlay = false;
+                this.loadPortfolioData();
+            }
         }
     }
 
     onGameWon() {
-        sessionStorage.setItem('andrezog_game_completed', 'true');
+        if (isPlatformBrowser(this.platformId)) {
+            sessionStorage.setItem('andrezog_game_completed', 'true');
+        }
         this.showPortfolio = true;
         this.showOverlay = false;
         this.loadPortfolioData();
     }
 
     skipGame() {
-        sessionStorage.setItem('andrezog_game_completed', 'true');
+        if (isPlatformBrowser(this.platformId)) {
+            sessionStorage.setItem('andrezog_game_completed', 'true');
+        }
         this.showPortfolio = true;
         this.showOverlay = false;
         this.loadPortfolioData();
