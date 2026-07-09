@@ -519,8 +519,9 @@ public class AuthService : IAuthService
         };
 
         // Validar que ExpireMinutes sea un número razonable (15 min - 24 horas)
-        var expireMinutes = int.Parse(_configuration["Jwt:ExpireMinutes"] ?? "60");
-        if (expireMinutes < 15 || expireMinutes > 1440)
+        // Usar TryParse para manejar valores nulos, vacíos o inválidos
+        if (!int.TryParse(_configuration["Jwt:ExpireMinutes"], out var expireMinutes)
+            || expireMinutes < 15 || expireMinutes > 1440)
         {
             expireMinutes = 60; // valor por defecto seguro
         }
