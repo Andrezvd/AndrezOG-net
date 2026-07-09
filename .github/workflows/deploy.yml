@@ -67,8 +67,9 @@ jobs:
         run: |
           dotnet tool install --global dotnet-ef
           dotnet restore ./backend-net/backend-net.csproj
-          # Reemplazar Host por localhost (el proxy redirige a Cloud SQL)
-          LOCAL_CS=$(echo "${{ secrets.DB_CONNECTION_STRING }}" | sed 's|Host=[^;]*|Host=localhost|')
+          # Reemplazar Host por localhost y deshabilitar SSL (el proxy ya cifra)
+          LOCAL_CS=$(echo "${{ secrets.DB_CONNECTION_STRING }}" | sed 's|Host=[^;]*|Host=localhost|; s|SSL Mode=[^;]*||; s|;*$||')
+          LOCAL_CS="${LOCAL_CS};SSL Mode=Disable"
           dotnet ef database update \
             --connection "$LOCAL_CS" \
             --project ./backend-net/backend-net.csproj
