@@ -52,13 +52,16 @@ jobs:
 
       # ─── Migraciones de Base de Datos ─────────────────────
       # Cloud SQL no acepta conexiones directas desde internet.
-      # Usamos Cloud SQL Auth Proxy tunelizado mediante Unix socket.
+      # Usamos Cloud SQL Auth Proxy en background.
       - name: "Start Cloud SQL Auth Proxy"
-        id: sql-proxy
-        uses: google-github-actions/cloud-sql-proxy@v1
-        with:
-          instance: ${{ env.CLOUD_SQL_INSTANCE }}
-          port: 5432
+        run: |
+          # Descargar Cloud SQL Auth Proxy
+          curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.2/cloud-sql-proxy.linux.amd64
+          chmod +x cloud-sql-proxy
+          # Iniciar proxy en background
+          ./cloud-sql-proxy ${{ env.CLOUD_SQL_INSTANCE }} --port 5432 &
+          sleep 5
+          echo "Proxy started"
 
       - name: "Run EF Core migrations"
         run: |
