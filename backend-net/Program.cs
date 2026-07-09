@@ -168,6 +168,23 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// ─── MIDDLEWARE DIAGNÓSTICO: capturar excepciones no controladas ───
+// Temporal: registrar stack trace completo en Logs Explorer.
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Excepción no controlada en {Method} {Path}",
+            context.Request.Method, context.Request.Path);
+        throw; // Relanzar para que ASP.NET Core maneje el 500
+    }
+});
+
 // Headers de seguridad
 app.Use(async (context, next) =>
 {
@@ -202,7 +219,40 @@ app.UseCors("AllowFrontendDev");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+// ─── HEALTH DIAGNÓSTICO: verificar conexión BD ───
+// Temporal: probar si la app llega a PostgreSQL.
+app.MapGet("/health", async (AppDbContext db) =>
+{
+    var result = new Dictionary<string, object>
+    {
+        ["status"] = "ok",
+        ["timestamp"] = DateTime.UtcNow.ToString("o")
+    };
+
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        result["database"] = canConnect;
+        if (!canConnect)
+        {
+            result["database_error"] = "CanConnectAsync returned false";
+        }
+    }
+    catch (Exception ex)
+    {
+        result["database"] = false;
+        result["database_error_type"] = ex.GetType().Name;
+        result["database_error_message"] = ex.Message;
+        if (ex.InnerException != null)
+        {
+            result["database_inner_error_type"] = ex.InnerException.GetType().Name;
+            result["database_inner_error_message"] = ex.InnerException.Message;
+        }
+    }
+
+    return Results.Ok(result);
+});
 app.MapControllers();
 
 // ── Nota: Las migraciones se ejecutan como paso en CI/CD ──

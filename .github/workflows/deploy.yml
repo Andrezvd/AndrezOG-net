@@ -57,7 +57,9 @@ jobs:
           service: ${{ env.BACKEND_SERVICE }}
           image: ${{ env.BACKEND_IMAGE }}:sha-${{ github.sha }}
           region: ${{ env.REGION }}
-          flags: --allow-unauthenticated
+          flags: >
+            --allow-unauthenticated
+            --add-cloudsql-instances=${{ env.CLOUD_SQL_INSTANCE }}
           env_vars: |
             ASPNETCORE_ENVIRONMENT=Production
             ASPNETCORE_HTTP_PORTS=8080
