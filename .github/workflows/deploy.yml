@@ -50,37 +50,6 @@ jobs:
       # Cloud Run en la misma región accede a Artifact Registry
       # automáticamente mediante IAM. No necesita credenciales.
 
-      # ─── Migraciones de Base de Datos ─────────────────────
-      # Cloud SQL no acepta conexiones directas desde internet.
-      # Usamos Cloud SQL Auth Proxy en background.
-      - name: "Start Cloud SQL Auth Proxy"
-        run: |
-          # Descargar Cloud SQL Auth Proxy
-          curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.2/cloud-sql-proxy.linux.amd64
-          chmod +x cloud-sql-proxy
-          # Iniciar proxy en background
-          ./cloud-sql-proxy ${{ env.CLOUD_SQL_INSTANCE }} --port 5432 &
-          sleep 5
-          echo "Proxy started"
-
-      - name: "Run EF Core migrations"
-        run: |
-          dotnet tool install --global dotnet-ef
-          dotnet restore ./backend-net/backend-net.csproj
-          # Reemplazar Host por localhost y deshabilitar SSL (el proxy ya cifra)
-          LOCAL_CS=$(echo "${{ secrets.DB_CONNECTION_STRING }}" | sed 's|Host=[^;]*|Host=localhost|; s|SSL Mode=[^;]*||; s|;*$||')
-          LOCAL_CS="${LOCAL_CS};SSL Mode=Disable"
-          dotnet ef database update \
-            --connection "$LOCAL_CS" \
-            --project ./backend-net/backend-net.csproj
-        env:
-          DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
-          Jwt__Key: "Temporary-Key-For-Migrations-That-Is-At-Least-32-Characters!!"
-          Jwt__Issuer: "AndrezOG"
-          Jwt__Audience: "AndrezOG-Client"
-          Jwt__ExpireMinutes: "60"
-          ASPNETCORE_ENVIRONMENT: "Development"
-
       # ─── Backend ──────────────────────────────────────────
       - name: "Deploy Backend to Cloud Run"
         uses: google-github-actions/deploy-cloudrun@v2
