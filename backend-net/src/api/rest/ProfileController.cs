@@ -16,9 +16,9 @@ using System.Security.Claims;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
-    private readonly FileStorageService _fileStorage;
+    private readonly IFileStorageService _fileStorage;
 
-    public ProfileController(IProfileService profileService, FileStorageService fileStorage)
+    public ProfileController(IProfileService profileService, IFileStorageService fileStorage)
     {
         _profileService = profileService;
         _fileStorage = fileStorage;
@@ -32,7 +32,7 @@ public class ProfileController : ControllerBase
         {
             return NotFound(new ErrorResponse("Perfil no encontrado"));
         }
-        return Ok(ProfileMapper.DomainToDto(profile));
+        return Ok(ProfileMapper.DomainToDto(profile, _fileStorage));
     }
 
     [HttpPatch("me")]
@@ -77,7 +77,7 @@ public class ProfileController : ControllerBase
         {
             return NotFound(new ErrorResponse("Perfil no encontrado"));
         }
-        return Ok(ProfileMapper.DomainToDto(profile));
+        return Ok(ProfileMapper.DomainToDto(profile, _fileStorage));
     }
 
     [HttpPost("photo")]
@@ -115,7 +115,7 @@ public class ProfileController : ControllerBase
         }
 
         // Eliminar foto anterior si existe
-        _fileStorage.DeleteFile(profile.PhotoUrl, "profiles");
+        await _fileStorage.DeleteFileAsync(profile.PhotoUrl);
 
         // Actualizar el perfil con la nueva URL de la foto
         var command = new Application.Commands.UpdateProfileCommand(
@@ -124,6 +124,6 @@ public class ProfileController : ControllerBase
         );
         await _profileService.UpdateProfileAsync(command);
 
-        return Ok(new { photoUrl });
+        return Ok(new { photoUrl = _fileStorage.GetPublicUrl(photoUrl) });
     }
 }

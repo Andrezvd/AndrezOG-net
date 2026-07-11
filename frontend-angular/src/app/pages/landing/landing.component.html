@@ -2,7 +2,7 @@
 
 <!-- Overlay del juego: aparece encima del canvas -->
 @if (showOverlay) {
-<div class="game-overlay" (mouseenter)="hoverSkip = true" (mouseleave)="hoverSkip = false">
+<div class="game-overlay">
   <div class="game-overlay-box">
     <h2 class="game-overlay-title">Bienvenido a AndrezOG</h2>
     <p class="game-overlay-subtitle">¿Estás listo para el desafío?</p>
@@ -13,6 +13,8 @@
       <button
         class="btn-overlay btn-skip"
         (click)="skipGame()"
+        (mouseenter)="hoverSkip = true"
+        (mouseleave)="hoverSkip = false"
         [class.btn-skip-hover]="hoverSkip"
       >
         [ {{ hoverSkip ? 'Me rindo' : 'Ir al home sin jugar' }} ]
@@ -39,48 +41,116 @@
     <nav class="flex justify-between items-center px-8 py-4" style="color: #1F1F1F;">
       <span class="text-xl font-bold tracking-wider" style="color: #000000; font-family: 'Cinzel', 'Playfair Display', serif;">AndrezOG</span>
 
-      <!-- Submenú "Get in Touch" con hover -->
-      <div
-        class="relative pb-2 -mb-2"
-        (mouseenter)="menuOpen = true"
-        (mouseleave)="menuOpen = false"
-      >
-        <span #menuTrigger
-          class="cursor-pointer transition-colors"
-          style="color: #000000; font-weight: bold;"
-          (mouseenter)="$any(menuTrigger).style.color = '#A52A2A'"
-          (mouseleave)="$any(menuTrigger).style.color = '#1F1F1F'">
-          Get in Touch
-          <span class="text-xs">{{ menuOpen ? '▲' : '▼' }}</span>
-        </span>
-
-        @if (menuOpen) {
+      <div class="flex items-center gap-4">
+        <!-- Avatar de usuario logueado -->
+        @if (authState.isAuthenticated) {
         <div
-          class="absolute right-0 top-full pt-2 backdrop-blur-md rounded-lg shadow-xl py-2 min-w-44 flex flex-col"
-          style="background: rgba(31, 31, 31, 0.95); border: 1px solid rgba(0, 0, 0, 0.1);"
+          class="relative"
+          (mouseenter)="userMenuOpen = true"
+          (mouseleave)="userMenuOpen = false"
         >
-          <a
-            routerLink="/register"
-            #linkRegister
-            class="px-4 py-2 transition-colors text-left w-full block"
-            style="color: #C7A44B;"
-            (mouseenter)="$any(linkRegister).style.color = '#fff'; $any(linkRegister).style.background = 'rgba(165, 42, 42, 0.6)'"
-            (mouseleave)="$any(linkRegister).style.color = '#C7A44B'; $any(linkRegister).style.background = 'transparent'"
+          <button
+            class="flex items-center gap-2 cursor-pointer px-3 py-1 rounded-full transition-colors"
+            style="background: rgba(199, 164, 75, 0.15); border: 1px solid rgba(199, 164, 75, 0.3); color: #1F1F1F;"
           >
-            Cliente
-          </a>
-          <a
-            routerLink="/login"
-            #linkLogin
-            class="px-4 py-2 transition-colors text-left w-full block"
-            style="color: #C7A44B;"
-            (mouseenter)="$any(linkLogin).style.color = '#fff'; $any(linkLogin).style.background = 'rgba(165, 42, 42, 0.6)'"
-            (mouseleave)="$any(linkLogin).style.color = '#C7A44B'; $any(linkLogin).style.background = 'transparent'"
+            <span
+              class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+              style="background: #C7A44B; color: #fff;"
+            >
+              {{ getUserInitials() }}
+            </span>
+            <span class="text-sm font-medium">{{ authState.state.name }}</span>
+          </button>
+
+          @if (userMenuOpen) {
+          <div
+            class="absolute right-0 top-full pt-2"
           >
-            Soy yo (Login)
-          </a>
+            <div
+              class="backdrop-blur-md rounded-lg shadow-xl py-2 min-w-44 flex flex-col"
+              style="background: rgba(31, 31, 31, 0.95); border: 1px solid rgba(0, 0, 0, 0.1);"
+            >
+              @if (authState.role === 'Admin') {
+              <a
+                routerLink="/admin/dashboard"
+                class="px-4 py-2 transition-colors text-left w-full block"
+                style="color: #C7A44B;"
+                (mouseenter)="$any($event.target).style.color = '#fff'; $any($event.target).style.background = 'rgba(165, 42, 42, 0.6)'"
+                (mouseleave)="$any($event.target).style.color = '#C7A44B'; $any($event.target).style.background = 'transparent'"
+              >
+                Dashboard Admin
+              </a>
+              }
+              @if (authState.role === 'Client') {
+              <a
+                routerLink="/client/dashboard"
+                class="px-4 py-2 transition-colors text-left w-full block"
+                style="color: #C7A44B;"
+                (mouseenter)="$any($event.target).style.color = '#fff'; $any($event.target).style.background = 'rgba(165, 42, 42, 0.6)'"
+                (mouseleave)="$any($event.target).style.color = '#C7A44B'; $any($event.target).style.background = 'transparent'"
+              >
+                Dashboard Cliente
+              </a>
+              }
+              <hr style="border-color: rgba(255, 255, 255, 0.1); margin: 4px 0;">
+              <button
+                (click)="logout()"
+                class="px-4 py-2 transition-colors text-left w-full"
+                style="color: #f87171;"
+                (mouseenter)="$any($event.target).style.background = 'rgba(248, 113, 113, 0.1)'"
+                (mouseleave)="$any($event.target).style.background = 'transparent'"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+          }
         </div>
         }
+
+        <!-- Submenú "Get in Touch" con hover -->
+        <div
+          class="relative pb-2 -mb-2"
+          (mouseenter)="menuOpen = true"
+          (mouseleave)="menuOpen = false"
+        >
+          <span #menuTrigger
+            class="cursor-pointer transition-colors"
+            style="color: #000000; font-weight: bold;"
+            (mouseenter)="$any(menuTrigger).style.color = '#A52A2A'"
+            (mouseleave)="$any(menuTrigger).style.color = '#1F1F1F'">
+            Get in Touch
+            <span class="text-xs">{{ menuOpen ? '▲' : '▼' }}</span>
+          </span>
+
+          @if (menuOpen) {
+          <div
+            class="absolute right-0 top-full pt-2 backdrop-blur-md rounded-lg shadow-xl py-2 min-w-44 flex flex-col"
+            style="background: rgba(31, 31, 31, 0.95); border: 1px solid rgba(0, 0, 0, 0.1);"
+          >
+            <a
+              routerLink="/register"
+              #linkRegister
+              class="px-4 py-2 transition-colors text-left w-full block"
+              style="color: #C7A44B;"
+              (mouseenter)="$any(linkRegister).style.color = '#fff'; $any(linkRegister).style.background = 'rgba(165, 42, 42, 0.6)'"
+              (mouseleave)="$any(linkRegister).style.color = '#C7A44B'; $any(linkRegister).style.background = 'transparent'"
+            >
+              Cliente
+            </a>
+            <a
+              routerLink="/login"
+              #linkLogin
+              class="px-4 py-2 transition-colors text-left w-full block"
+              style="color: #C7A44B;"
+              (mouseenter)="$any(linkLogin).style.color = '#fff'; $any(linkLogin).style.background = 'rgba(165, 42, 42, 0.6)'"
+              (mouseleave)="$any(linkLogin).style.color = '#C7A44B'; $any(linkLogin).style.background = 'transparent'"
+            >
+              Soy yo (Login)
+            </a>
+          </div>
+          }
+        </div>
       </div>
     </nav>
 
@@ -98,7 +168,7 @@
             <!-- Foto circular -->
             @if (profile.photoUrl) {
               <img
-                [src]="apiImagesUrl + profile.photoUrl"
+                [src]="profile.photoUrl"
                 [alt]="profile.name"
                 class="w-32 h-32 rounded-full object-cover shadow-xl"
                 style="border: 4px solid #C7A44B;"
@@ -111,7 +181,6 @@
               </div>
             }
 
-            <!-- ... existing contact, skills, right column ... -->
             <div class="text-sm space-y-2 text-center md:text-left md:items-start" style="color: #1F1F1F;">
 
               @if (profile.phoneNumber) {
@@ -162,7 +231,7 @@
                     <div class="relative group flex flex-col items-center">
                       @if (skill.imageUrl) {
                         <img
-                          [src]="apiImagesUrl + skill.imageUrl"
+                          [src]="skill.imageUrl"
                           [alt]="skill.name"
                           class="w-10 h-10 rounded-full object-cover shadow-md cursor-pointer transition-transform duration-200 group-hover:scale-110"
                           style="border: 2px solid #C7A44B;"

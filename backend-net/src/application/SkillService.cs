@@ -11,9 +11,9 @@ using AndrezOG.Shared.StorageService;
 public class SkillService : ISkillService
 {
     private readonly ISkillRepository _repository;
-    private readonly FileStorageService _fileStorage;
+    private readonly IFileStorageService _fileStorage;
 
-    public SkillService(ISkillRepository skillRepository, FileStorageService fileStorage)
+    public SkillService(ISkillRepository skillRepository, IFileStorageService fileStorage)
     {
         _repository = skillRepository;
         _fileStorage = fileStorage;
@@ -103,7 +103,7 @@ public class SkillService : ISkillService
         // Eliminar imagen si se solicito
         if (command.RemoveImage && !string.IsNullOrWhiteSpace(existing.ImageUrl))
         {
-            _fileStorage.DeleteFile(existing.ImageUrl, "skills");
+            await _fileStorage.DeleteFileAsync(existing.ImageUrl);
             imageUrl = null;
         }
 
@@ -111,7 +111,7 @@ public class SkillService : ISkillService
         if (command.ImageFile is not null)
         {
             if (!string.IsNullOrWhiteSpace(existing.ImageUrl))
-                _fileStorage.DeleteFile(existing.ImageUrl, "skills");
+                await _fileStorage.DeleteFileAsync(existing.ImageUrl);
 
             try
             {
@@ -149,9 +149,9 @@ public class SkillService : ISkillService
         if (skill is null)
             return SkillResult.Fail($"No skill found with ID {id}.");
 
-        // Eliminar archivo de imagen del disco
+        // Eliminar archivo de imagen
         if (!string.IsNullOrWhiteSpace(skill.ImageUrl))
-            _fileStorage.DeleteFile(skill.ImageUrl, "skills");
+            await _fileStorage.DeleteFileAsync(skill.ImageUrl);
 
         await _repository.HardDeleteAsync(id);
         return SkillResult.Ok(MapToDto(skill));

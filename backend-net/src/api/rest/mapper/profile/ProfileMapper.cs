@@ -3,6 +3,7 @@ namespace AndrezOG.Api.Rest.Mapper.Profile;
 using AndrezOG.Application.Commands;
 using AndrezOG.Api.Rest.Dto.Profile;
 using AndrezOG.Domain.Model.Tenant;
+using AndrezOG.Shared.StorageService;
 public static class ProfileMapper
 {
     public static UpdateProfileCommand ToUpdateProfileCommand(int userId, UpdateRequest requestdto)
@@ -31,7 +32,7 @@ public static class ProfileMapper
         );
     }
 
-    public static MyProfileDto DomainToDto(Profile profile)
+    public static MyProfileDto DomainToDto(Profile profile, IFileStorageService? storage = null)
     {
         return new MyProfileDto
         {
@@ -49,7 +50,9 @@ public static class ProfileMapper
             Education = profile.Education ?? string.Empty,
             EducationStartYear = profile.EducationStartYear ?? string.Empty,
             EducationEndYear = profile.EducationEndYear ?? string.Empty,
-            PhotoUrl = profile.PhotoUrl ?? string.Empty,
+            PhotoUrl = storage != null && !string.IsNullOrEmpty(profile.PhotoUrl)
+                ? storage.GetPublicUrl(profile.PhotoUrl)
+                : profile.PhotoUrl ?? string.Empty,
             VideoUrl = profile.VideoUrl ?? string.Empty,
             Email = profile.Email ?? string.Empty,
             LinkedInUrl = profile.LinkedInUrl ?? string.Empty,

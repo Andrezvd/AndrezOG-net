@@ -70,6 +70,8 @@ jobs:
             Google__ClientId=${{ secrets.GOOGLE_CLIENT_ID }}
             Google__ClientSecret=${{ secrets.GOOGLE_CLIENT_SECRET }}
             Google__RedirectUri=${{ secrets.GOOGLE_REDIRECT_URI }}
+            Storage__Provider=GoogleCloud
+            Storage__BucketName=andrezog-uploads
             AdminEmails__0=${{ secrets.ADMIN_EMAIL }}
 
       # ─── Frontend ─────────────────────────────────────────

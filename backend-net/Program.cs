@@ -46,10 +46,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// File Storage (singleton: una instancia para toda la app)
-var webRootPath = builder.Environment.WebRootPath
-    ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
-builder.Services.AddSingleton(new FileStorageService(webRootPath));
+// File Storage: Local (desarrollo) o Google Cloud Storage (produccion)
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
+var storageProvider = builder.Configuration.GetValue<string>("Storage:Provider") ?? "Local";
+if (storageProvider == "GoogleCloud")
+{
+    builder.Services.AddSingleton(Google.Cloud.Storage.V1.StorageClient.Create());
+    builder.Services.AddScoped<IFileStorageService, GoogleCloudStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+    builder.Services.AddScoped<LocalFileStorageService>(); // Para compatibilidad directa si es necesario
+}
 
 // Límite global de cuerpo de request para evitar payloads maliciosos
 builder.WebHost.ConfigureKestrel(options =>
