@@ -29,8 +29,8 @@ public class GoogleCloudStorageService : IFileStorageService
         if (file == null || file.Length == 0)
             throw new ArgumentException("El archivo no puede estar vacío.", nameof(file));
 
-        if (file.Length > 5 * 1024 * 1024)
-            throw new InvalidOperationException("El archivo excede el tamaño máximo permitido de 5MB.");
+        if (file.Length > 1 * 1024 * 1024)
+            throw new InvalidOperationException("El archivo excede el tamaño máximo permitido de 1MB.");
 
         var extension = Path.GetExtension(file.FileName);
         if (!AllowedExtensions.Contains(extension))

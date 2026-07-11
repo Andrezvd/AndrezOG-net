@@ -1,3 +1,23 @@
+/* ── Home button ── */
+.btn-home-admin {
+  padding: 0.4rem 0.8rem; font-size: 0.8rem; background: transparent;
+  color: #C7A44B; border: 1px solid rgba(199, 164, 75, 0.3);
+  border-radius: 6px; cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-home-admin:hover { background: #C7A44B; color: #1e293b; }
+
+/* ── Responsive header ── */
+@media (max-width: 640px) {
+  .admin-header { flex-direction: column; gap: 0.5rem; padding: 1rem; align-items: stretch; }
+  .header-left { text-align: center; }
+  .header-right { justify-content: center; flex-wrap: wrap; }
+  .header-email { display: none; }
+  .admin-nav { padding: 0.5rem 1rem; }
+  .admin-main { padding: 1rem; }
+}
+
 /* ── Shell ── */
 .admin-shell {
   min-height: 100vh;

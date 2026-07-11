@@ -1,23 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { VistaPreviaComponent } from '../preview/decorator/vista-previa.component';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { AuthService } from '../../auth/api/auth.service';
 import { ProfileService } from '../../profile/api/profile.service';
 import { MyProfileDto } from '../../profile/types/profile.types';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { API_URL, API_URL_IMAGES } from '../../../services-conf/api-config';
+import { API_URL } from '../../../services-conf/api-config';
+import { SkillDto } from '../types/dashboard.types';
 
-interface SkillDto {
-  id: number;
-  name: string;
-  skillType: string;
-  description: string | null;
-  isActive: boolean;
-  imageUrl: string | null;
-}
 
 type AdminSection = 'profile' | 'skills' | 'projects' | 'settings';
 
@@ -42,8 +35,6 @@ export class AdminDashboardComponent implements OnInit {
     { key: 'settings', label: 'Settings', icon: '⚙️' }
   ];
 
-  // URLs
-  apiImagesUrl = API_URL_IMAGES;
 
   // Perfil
   profile = signal<MyProfileDto | null>(null);
@@ -135,6 +126,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (res) => {
         this.photoUploading.set(false); this.photoMsg.set('Foto actualizada ✓');
         const p = this.profile();
+        // res.photoUrl ya es URL completa (GCS) o relativa (local), el mapper la transforma
         if (p) { p.photoUrl = res.photoUrl + '?t=' + Date.now(); this.profile.set({ ...p }); }
         setTimeout(() => this.photoMsg.set(null), 3000);
       },
@@ -257,10 +249,14 @@ export class AdminDashboardComponent implements OnInit {
   // LOGOUT
   // ================================================================
 
+  goHome(): void {
+    this.router.navigate(['/']);
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login'])
+      next: () => this.router.navigate(['/']),
+      error: () => this.router.navigate(['/'])
     });
   }
 }

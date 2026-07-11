@@ -1,0 +1,57 @@
+<nav class="landing-navbar">
+  <span class="navbar-logo">AndrezOG</span>
+
+  <div class="navbar-right">
+    <!-- Avatar de usuario logueado -->
+    @if (isAuthenticated) {
+    <div
+      class="relative"
+      (mouseenter)="toggleUserMenu.emit()"
+      (mouseleave)="toggleUserMenu.emit()"
+    >
+      <button class="user-avatar-btn">
+        <span class="user-avatar-circle">{{ userInitials }}</span>
+        <span class="user-name">{{ userName }}</span>
+      </button>
+
+      @if (userMenuOpen) {
+      <div class="dropdown-menu">
+        @if (userRole === 'Admin') {
+        <a routerLink="/admin/dashboard" class="dropdown-item">
+          Dashboard Admin
+        </a>
+        }
+        @if (userRole === 'Client') {
+        <a routerLink="/client/dashboard" class="dropdown-item">
+          Dashboard Cliente
+        </a>
+        }
+        <hr class="dropdown-divider">
+        <button (click)="logout.emit()" class="dropdown-item dropdown-danger">
+          Cerrar sesión
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Submenú "Get in Touch" -->
+    <div
+      class="relative"
+      (mouseenter)="toggleMenu.emit()"
+      (mouseleave)="toggleMenu.emit()"
+    >
+      <span class="get-in-touch-trigger">
+        Get in Touch
+        <span class="text-xs">{{ menuOpen ? '▲' : '▼' }}</span>
+      </span>
+
+      @if (menuOpen) {
+      <div class="dropdown-menu">
+        <a routerLink="/register" class="dropdown-item">Cliente</a>
+        <a routerLink="/login" class="dropdown-item">Soy yo (Login)</a>
+      </div>
+      }
+    </div>
+  </div>
+</nav>

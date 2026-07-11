@@ -1,22 +1,24 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { Observable, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { GameCanvas } from '../../game-canvas/game-canvas';
-import { ProfileService } from '../profile/api/profile.service';
-import { MyProfileDto } from '../profile/types/profile.types';
-import { SkillService } from './api/skill.service';
-import { SkillCardDto } from './types/skill.types';
-import { AuthStateService } from '../../services/auth-state.service';
-import { AuthService } from '../auth/api/auth.service';
+import { GameCanvas } from '../../../game-canvas/game-canvas';
+import { ProfileService } from '../../profile/api/profile.service';
+import { MyProfileDto } from '../../profile/types/profile.types';
+import { SkillService } from '../api/skill.service';
+import { SkillCardDto } from '../types/skill.types';
+import { AuthStateService } from '../../../services/auth-state.service';
+import { AuthService } from '../../auth/api/auth.service';
+import { LandingNavbarComponent } from './landing-navbar.component';
+import { LandingFooterComponent } from './landing-footer.component';
 
 @Component({
     selector: 'app-landing',
-    imports: [GameCanvas, RouterLink, AsyncPipe],
-    templateUrl: './landing.component.html',
-    styleUrl: '../../app.css'
+    imports: [GameCanvas, AsyncPipe, LandingNavbarComponent, LandingFooterComponent],
+    templateUrl: '../ui/landing.component.html',
+    styleUrl: '../../../app.css'
 })
 export class LandingComponent implements OnInit, OnDestroy {
     showPortfolio = false;
@@ -24,6 +26,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     hoverSkip = false;
     menuOpen = false;
     userMenuOpen = false;
+    profileLoaded = false;
     profile$: Observable<MyProfileDto | null> = of(null);
     skills: SkillCardDto[] = [];
     private skillsSub?: Subscription;
@@ -69,6 +72,7 @@ export class LandingComponent implements OnInit, OnDestroy {
         this.profile$ = this.profileService.getPublicProfile().pipe(
             catchError(() => of(null))
         );
+        setTimeout(() => this.profileLoaded = true, 100);
         this.skillsSub?.unsubscribe();
         this.skillsSub = this.skillService.getPublicSkills().pipe(
             catchError(() => of([]))

@@ -6,6 +6,7 @@
       <p class="header-sub">Bienvenido, Sr. {{ userName() }}</p>
     </div>
     <div class="header-right">
+      <button class="btn-home-admin" (click)="goHome()">← Inicio</button>
       <span class="header-email">{{ userEmail() }}</span>
       <button class="btn-logout" (click)="logout()">Cerrar</button>
     </div>
@@ -34,7 +35,7 @@
           <h2 class="section-title">Editar Perfil</h2>
           <div class="photo-section">
             @if (p.photoUrl) {
-              <img [src]="apiImagesUrl + p.photoUrl" alt="Foto" class="photo-preview" />
+              <img [src]="p.photoUrl" alt="Foto" class="photo-preview" />
             } @else {
               <div class="photo-fallback">{{ p.name.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
             }
@@ -74,7 +75,7 @@
         <section class="col-preview">
           <h2 class="section-title">Vista previa</h2>
           <p class="preview-hint">Así se verá en tu portafolio</p>
-          <app-vista-previa [profile]="p" [apiImagesUrl]="apiImagesUrl" />
+          <app-vista-previa [profile]="p" />
         </section>
       </main>
     }
@@ -124,7 +125,7 @@
                   <input type="text" [(ngModel)]="skill.description" placeholder="Descripción" />
                   <div class="skill-edit-image">
                     @if (skill.imageUrl && !skillEditRemoveImage() && !skillEditImageFile()) {
-                      <img [src]="apiImagesUrl + skill.imageUrl" alt="preview" class="skill-img-preview" />
+                      <img [src]="skill.imageUrl" alt="preview" class="skill-img-preview" />
                       <button class="btn-sm btn-danger" (click)="removeEditSkillImage()">🗑 Quitar</button>
                     } @else if (skillEditImageFile()) {
                       <span class="skill-img-name">{{ skillEditImageFile()!.name }}</span>

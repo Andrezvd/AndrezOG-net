@@ -115,6 +115,21 @@
   color: rgba(31, 31, 31, 0.7);
 }
 
+/* ── Transition suave para contenido del portfolio ── */
+.content-fade-in {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.content-fade-in.content-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fallback-content {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
 /* ── Landing Footer ── */
 .landing-footer {
   position: relative;
