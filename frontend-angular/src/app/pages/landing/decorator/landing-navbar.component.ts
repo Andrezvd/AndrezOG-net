@@ -13,6 +13,7 @@ export class LandingNavbarComponent {
   @Input() userName = '';
   @Input() userRole: string | null = '';
   @Input() userInitials = '?';
+  @Input() profilePhotoUrl: string | null = null;
   @Input() menuOpen = false;
   @Input() userMenuOpen = false;
   @Output() toggleMenu = new EventEmitter<void>();

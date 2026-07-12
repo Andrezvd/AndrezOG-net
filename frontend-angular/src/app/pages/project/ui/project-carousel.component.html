@@ -1,0 +1,53 @@
+<!-- Proyectos Carrusel -->
+@if (projects.length > 0) {
+  <div class="mt-12 w-full">
+    <h2 class="project-carousel-title">Proyectos</h2>
+
+    <div class="project-carousel">
+      <!-- Tarjeta actual -->
+      <div class="project-card">
+        <div class="project-card-image">
+          @if (projects[currentIndex].imageUrl) {
+            <img [src]="projects[currentIndex].imageUrl" [alt]="projects[currentIndex].title" />
+          } @else {
+            <div class="project-card-image-placeholder">
+              <span class="text-4xl">📁</span>
+            </div>
+          }
+          <span class="project-card-type">{{ projects[currentIndex].type }}</span>
+        </div>
+
+        <div class="project-card-body">
+          <h3 class="project-card-title">{{ projects[currentIndex].title }}</h3>
+          @if (projects[currentIndex].description) {
+            <p class="project-card-description">{{ projects[currentIndex].description }}</p>
+          }
+          @if (projects[currentIndex].stacks.length > 0) {
+            <div class="project-card-stacks">
+              <p class="project-card-stacks-label">Stacks</p>
+              <p class="project-card-stacks-text">{{ getStacksSummary(projects[currentIndex].stacks) }}</p>
+            </div>
+          }
+          @if (projects[currentIndex].repositoryUrl) {
+            <a [href]="projects[currentIndex].repositoryUrl" target="_blank" rel="noopener"
+              class="project-card-link">🔗 Repositorio</a>
+          }
+        </div>
+      </div>
+
+      <!-- Navegación -->
+      @if (projects.length > 1) {
+        <div class="project-carousel-nav">
+          <button class="carousel-btn carousel-btn-prev" (click)="prev.emit()">◀</button>
+          <div class="carousel-dots">
+            @for (item of projects; track item.id; let i = $index) {
+              <span class="carousel-dot" [class.carousel-dot-active]="i === currentIndex"
+                (click)="goTo.emit(i)"></span>
+            }
+          </div>
+          <button class="carousel-btn carousel-btn-next" (click)="next.emit()">▶</button>
+        </div>
+      }
+    </div>
+  </div>
+}

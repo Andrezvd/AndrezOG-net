@@ -10,32 +10,39 @@
       (mouseleave)="toggleUserMenu.emit()"
     >
       <button class="user-avatar-btn">
-        <span class="user-avatar-circle">{{ userInitials }}</span>
+        @if (profilePhotoUrl) {
+          <img [src]="profilePhotoUrl" [alt]="userName" class="user-avatar-img" />
+        } @else {
+          <span class="user-avatar-circle">{{ userInitials }}</span>
+        }
         <span class="user-name">{{ userName }}</span>
       </button>
 
       @if (userMenuOpen) {
-      <div class="dropdown-menu">
-        @if (userRole === 'Admin') {
-        <a routerLink="/admin/dashboard" class="dropdown-item">
-          Dashboard Admin
-        </a>
-        }
-        @if (userRole === 'Client') {
-        <a routerLink="/client/dashboard" class="dropdown-item">
-          Dashboard Cliente
-        </a>
-        }
-        <hr class="dropdown-divider">
-        <button (click)="logout.emit()" class="dropdown-item dropdown-danger">
-          Cerrar sesión
-        </button>
+      <div class="dropdown-wrapper">
+        <div class="dropdown-menu">
+          @if (userRole === 'Admin') {
+          <a routerLink="/admin/dashboard" class="dropdown-item">
+            <span class="dropdown-item-icon">⚙️</span> Dashboard Admin
+          </a>
+          }
+          @if (userRole === 'Client') {
+          <a routerLink="/client/dashboard" class="dropdown-item">
+            <span class="dropdown-item-icon">📊</span> Dashboard Cliente
+          </a>
+          }
+          <hr class="dropdown-divider">
+          <button (click)="logout.emit()" class="dropdown-item dropdown-danger">
+            <span class="dropdown-item-icon">🚪</span> Cerrar sesión
+          </button>
+        </div>
       </div>
       }
     </div>
     }
 
-    <!-- Submenú "Get in Touch" -->
+    <!-- Submenú "Get in Touch" (oculto si ya hay sesión) -->
+    @if (!isAuthenticated) {
     <div
       class="relative"
       (mouseenter)="toggleMenu.emit()"
@@ -47,11 +54,18 @@
       </span>
 
       @if (menuOpen) {
-      <div class="dropdown-menu">
-        <a routerLink="/register" class="dropdown-item">Cliente</a>
-        <a routerLink="/login" class="dropdown-item">Soy yo (Login)</a>
+      <div class="dropdown-wrapper">
+        <div class="dropdown-menu">
+          <a routerLink="/register" class="dropdown-item">
+            <span class="dropdown-item-icon">📝</span> Registro
+          </a>
+          <a routerLink="/login" class="dropdown-item">
+            <span class="dropdown-item-icon">🔑</span> Login
+          </a>
+        </div>
       </div>
       }
     </div>
+    }
   </div>
 </nav>

@@ -1,0 +1,195 @@
+/* ── Project Carousel ── */
+.project-carousel-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #1F1F1F;
+    font-family: 'Cinzel', 'Playfair Display', serif;
+}
+
+.project-carousel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.project-card {
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  background: rgba(31, 31, 31, 0.85);
+  border: 1px solid rgba(199, 164, 75, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.project-card-image {
+  position: relative;
+  width: 100%;
+  height: 12rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.project-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-card-type {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(199, 164, 75, 0.9);
+  color: #1F1F1F;
+}
+
+.project-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.project-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #C7A44B;
+  font-family: 'Cinzel', 'Playfair Display', serif;
+}
+
+.project-card-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.project-card-stacks {
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(199, 164, 75, 0.15);
+}
+
+.project-card-stacks-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    color: rgba(199, 164, 75, 0.7);
+}
+
+.project-card-stacks-text {
+  font-size: 0.8rem;
+  color: rgba(226, 232, 240, 0.8);
+  line-height: 1.4;
+}
+
+.project-card-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #C7A44B;
+  text-decoration: none;
+  transition: color 0.2s;
+  margin-top: 0.25rem;
+}
+
+.project-card-link:hover {
+  color: #e2b84b;
+  text-decoration: underline;
+}
+
+/* Navegación */
+.project-carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.carousel-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(199, 164, 75, 0.3);
+  background: rgba(31, 31, 31, 0.8);
+  color: #C7A44B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.carousel-btn:hover {
+  background: rgba(199, 164, 75, 0.2);
+  border-color: #C7A44B;
+  transform: scale(1.1);
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: rgba(199, 164, 75, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.carousel-dot:hover {
+  background: rgba(199, 164, 75, 0.6);
+}
+
+.carousel-dot-active {
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #C7A44B;
+  box-shadow: 0 0 8px rgba(199, 164, 75, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .project-card-image {
+    height: 10rem;
+  }
+
+  .project-card-body {
+    padding: 1rem;
+  }
+
+  .project-card-title {
+    font-size: 1.1rem;
+  }
+}

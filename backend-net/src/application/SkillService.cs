@@ -159,14 +159,21 @@ public class SkillService : ISkillService
 
     // ---------- Mapeo interno ----------
 
-    private static SkillAppDto MapToDto(Skill skill) =>
-        new()
+    private SkillAppDto MapToDto(Skill skill)
+    {
+        var relativeUrl = skill.ImageUrl;
+        var publicUrl = !string.IsNullOrEmpty(relativeUrl)
+            ? _fileStorage.GetPublicUrl(relativeUrl)
+            : null;
+
+        return new SkillAppDto
         {
             Id = skill.Id,
             Name = skill.Name,
             SkillType = skill.SkillType,
             Description = skill.Description,
             IsActive = skill.IsActive,
-            ImageUrl = skill.ImageUrl
+            ImageUrl = publicUrl
         };
+    }
 }
