@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -45,7 +45,8 @@ export class LandingComponent implements OnInit, OnDestroy {
         private projectService: ProjectService,
         public authState: AuthStateService,
         private authService: AuthService,
-        private router: Router
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -91,7 +92,10 @@ export class LandingComponent implements OnInit, OnDestroy {
         this.projectsSub?.unsubscribe();
         this.projectsSub = this.projectService.getPublicProjects().pipe(
             catchError(() => of([]))
-        ).subscribe(list => this.projects = list);
+        ).subscribe(list => {
+            this.projects = list;
+            this.cdr.detectChanges(); // Forzar detección post-SSR
+        });
 
         // Si el usuario está logueado, cargar SU perfil (para la foto en el navbar)
         if (this.authState.isAuthenticated) {
@@ -109,24 +113,6 @@ export class LandingComponent implements OnInit, OnDestroy {
         this.skillsSub?.unsubscribe();
         this.projectsSub?.unsubscribe();
         this.myProfileSub?.unsubscribe();
-    }
-
-    prevProject(): void {
-        if (this.projects.length === 0) return;
-        this.currentProjectIndex = this.currentProjectIndex === 0
-            ? this.projects.length - 1
-            : this.currentProjectIndex - 1;
-    }
-
-    nextProject(): void {
-        if (this.projects.length === 0) return;
-        this.currentProjectIndex = this.currentProjectIndex === this.projects.length - 1
-            ? 0
-            : this.currentProjectIndex + 1;
-    }
-
-    getStacksSummary(stacks: { summary: string }[]): string {
-        return stacks.map(s => s.summary).join(' • ');
     }
 
     toggleMenu() {

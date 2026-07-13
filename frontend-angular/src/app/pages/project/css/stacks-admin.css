@@ -1,0 +1,136 @@
+/* ── Stacks Admin ── */
+.stacks-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(199, 164, 75, 0.12);
+}
+
+.section-subtitle {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #C7A44B;
+  margin: 0;
+}
+
+.stack-form {
+  background: rgba(31, 31, 31, 0.5);
+  border: 1px solid rgba(199, 164, 75, 0.15);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border: 1px solid rgba(199, 164, 75, 0.2);
+  background: rgba(31, 31, 31, 0.6);
+  color: rgba(255, 255, 255, 0.65);
+  transition: all 0.2s;
+}
+
+.skill-chip:hover {
+  border-color: #C7A44B;
+  background: rgba(199, 164, 75, 0.1);
+}
+
+.skill-chip-selected {
+  border-color: #C7A44B;
+  background: rgba(199, 164, 75, 0.2);
+  color: #C7A44B;
+}
+
+.chip-check {
+  font-weight: bold;
+  color: #C7A44B;
+}
+
+.stacks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stack-item {
+  background: rgba(31, 31, 31, 0.3);
+  border: 1px solid rgba(199, 164, 75, 0.1);
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+}
+
+.stack-item:hover {
+  border-color: rgba(199, 164, 75, 0.2);
+  background: rgba(31, 31, 31, 0.4);
+}
+
+.stack-inactive {
+  opacity: 0.45;
+}
+
+.stack-main {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.stack-summary {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.stack-category {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  background: rgba(199, 164, 75, 0.1);
+  color: #C7A44B;
+  border: 1px solid rgba(199, 164, 75, 0.12);
+}
+
+.stack-skills-count {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  background: rgba(165, 42, 42, 0.12);
+  color: #f87171;
+}
+
+.stack-skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.mini-skill-tag {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+  background: rgba(199, 164, 75, 0.08);
+  color: rgba(199, 164, 75, 0.75);
+  border: 1px solid rgba(199, 164, 75, 0.1);
+}
+
+.stack-actions {
+  display: flex;
+  gap: 0.4rem;
+}

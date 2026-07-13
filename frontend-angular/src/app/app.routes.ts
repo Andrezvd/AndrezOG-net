@@ -8,18 +8,20 @@ import { AdminGuard } from './services/auth.guard';
 import { AuthGuard } from './services/auth.guard';
 
 export const routes: Routes = [
-    { path: '', component: LandingComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
+    { path: '', component: LandingComponent, data: { title: 'OG Home' } },
+    { path: 'login', component: LoginComponent, data: { title: 'OG Login' } },
+    { path: 'register', component: RegisterComponent, data: { title: 'OG Register' } },
     {
         path: 'admin/dashboard',
         component: AdminDashboardComponent,
-        canActivate: [AdminGuard]
+        canActivate: [AdminGuard],
+        data: { title: 'OG Admin' }
     },
     {
         path: 'client/dashboard',
         component: ClientDashboardComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
+        data: { title: 'OG Client' }
     },
     { path: '**', redirectTo: '' },
 ];

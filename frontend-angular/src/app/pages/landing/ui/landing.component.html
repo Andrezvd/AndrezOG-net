@@ -141,13 +141,7 @@
 
           <!-- Proyectos Carrusel (componente standalone) -->
           <div class="animate-section animate-section-3">
-            <app-project-carousel
-              [projects]="projects"
-              [currentIndex]="currentProjectIndex"
-              (prev)="prevProject()"
-              (next)="nextProject()"
-              (goTo)="currentProjectIndex = $event"
-            />
+            <app-project-carousel [projects]="projects" />
           </div>
         </div>
 

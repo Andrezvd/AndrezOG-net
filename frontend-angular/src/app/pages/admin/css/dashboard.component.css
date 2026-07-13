@@ -242,3 +242,192 @@
 .text-red-400 { color: #f87171; }
 .text-green { color: #4ade80; }
 .text-red { color: #f87171; }
+
+/* ── Project Admin ── */
+.project-form {
+  background: rgba(31, 31, 31, 0.5);
+  border: 1px solid rgba(199, 164, 75, 0.15);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.project-image-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.project-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-img {
+  width: 6rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(199, 164, 75, 0.3);
+}
+
+.project-img-name {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stacks-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.stack-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid rgba(199, 164, 75, 0.25);
+  background: rgba(31, 31, 31, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
+}
+
+.stack-chip:hover {
+  border-color: #C7A44B;
+  background: rgba(199, 164, 75, 0.1);
+}
+
+.stack-chip-selected {
+  border-color: #C7A44B;
+  background: rgba(199, 164, 75, 0.2);
+  color: #C7A44B;
+}
+
+.stack-check {
+  font-weight: bold;
+  color: #C7A44B;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn-cancel {
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.project-item {
+  background: rgba(31, 31, 31, 0.4);
+  border: 1px solid rgba(199, 164, 75, 0.12);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s;
+}
+
+.project-item:hover {
+  border-color: rgba(199, 164, 75, 0.25);
+  background: rgba(31, 31, 31, 0.5);
+}
+
+.project-inactive {
+  opacity: 0.5;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.project-title {
+  font-weight: 600;
+  color: #C7A44B;
+  font-size: 1rem;
+}
+
+.project-type {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(199, 164, 75, 0.15);
+  color: #C7A44B;
+}
+
+.project-stacks-badge {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(165, 42, 42, 0.15);
+  color: #f87171;
+}
+
+.project-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.project-stacks-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.stack-badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(199, 164, 75, 0.1);
+  border: 1px solid rgba(199, 164, 75, 0.15);
+  color: rgba(199, 164, 75, 0.8);
+}
+
+.project-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header .section-title {
+  margin-bottom: 0;
+}

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { VistaPreviaComponent } from '../preview/decorator/vista-previa.component';
+import { ProjectsAdminComponent } from '../../project/decorator/projects-admin.component';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { AuthService } from '../../auth/api/auth.service';
 import { ProfileService } from '../../profile/api/profile.service';
@@ -19,7 +20,7 @@ type AdminSection = 'profile' | 'skills' | 'projects' | 'settings';
   standalone: true,
   templateUrl: '../ui/dashboard.component.html',
   styleUrls: ['../css/dashboard.component.css'],
-  imports: [FormsModule, CommonModule, VistaPreviaComponent]
+  imports: [FormsModule, CommonModule, VistaPreviaComponent, ProjectsAdminComponent]
 })
 export class AdminDashboardComponent implements OnInit {
   // Auth

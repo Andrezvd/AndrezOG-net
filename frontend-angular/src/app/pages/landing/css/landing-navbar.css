@@ -7,6 +7,22 @@
 }
 
 .navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.navbar-logo:hover {
+  opacity: 0.8;
+}
+
+.navbar-logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.navbar-logo span {
   font-size: 1.25rem;
   font-weight: bold;
   letter-spacing: 0.05em;

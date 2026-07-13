@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ProjectCardDto } from '../types/project.types';
 
 @Component({
@@ -9,12 +9,4 @@ import { ProjectCardDto } from '../types/project.types';
 })
 export class ProjectCarouselComponent {
     @Input() projects: ProjectCardDto[] = [];
-    @Input() currentIndex = 0;
-    @Output() prev = new EventEmitter<void>();
-    @Output() next = new EventEmitter<void>();
-    @Output() goTo = new EventEmitter<number>();
-
-    getStacksSummary(stacks: { summary: string }[]): string {
-        return stacks.map(s => s.summary).join(' • ');
-    }
 }

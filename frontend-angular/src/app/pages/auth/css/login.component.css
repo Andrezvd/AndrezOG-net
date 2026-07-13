@@ -33,20 +33,30 @@
 
 /* ── Logo ── */
 .auth-logo {
-  display: block;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  margin-bottom: 1.2rem;
+  transition: opacity 0.2s;
+}
+
+.auth-logo:hover {
+  opacity: 0.8;
+}
+
+.auth-logo-img {
+  height: 36px;
+  width: auto;
+}
+
+.auth-logo span {
   font-family: 'Cinzel', 'Playfair Display', serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #C7A44B;
-  text-decoration: none;
   letter-spacing: 0.05em;
-  margin-bottom: 1.2rem;
-  transition: color 0.2s;
-}
-
-.auth-logo:hover {
-  color: #A52A2A;
 }
 
 /* ── Título ── */

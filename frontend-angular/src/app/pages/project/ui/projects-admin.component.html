@@ -1,0 +1,148 @@
+<section class="section">
+
+  <!-- Stacks Admin integrado arriba para ver stacks disponibles -->
+  <app-stacks-admin (stacksChanged)="loadStackOptions()" />
+
+  <div class="section-header">
+    <h2 class="section-title">Proyectos</h2>
+    @if (!showForm()) {
+      <button class="btn-save text-sm" (click)="openCreate()">+ Nuevo Proyecto</button>
+    }
+  </div>
+
+  @if (formSaveMsg()) {
+    <p class="save-msg">{{ formSaveMsg() }}</p>
+  }
+
+  <!-- Formulario de creación/edición -->
+  @if (showForm()) {
+    <div class="project-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Título *</label>
+          <input type="text" [ngModel]="formTitle()" (ngModelChange)="formTitle.set($event)" placeholder="Nombre del proyecto" />
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select [ngModel]="formType()" (ngModelChange)="formType.set($event)">
+            @for (t of projectTypes; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha inicio</label>
+          <input type="date" [ngModel]="formStartDate()" (ngModelChange)="formStartDate.set($event)" />
+        </div>
+        <div class="form-group">
+          <label>Fecha fin</label>
+          <input type="date" [ngModel]="formEndDate()" (ngModelChange)="formEndDate.set($event)" />
+        </div>
+        <div class="form-group">
+          <label>URL Repositorio</label>
+          <input type="url" [ngModel]="formRepositoryUrl()" (ngModelChange)="formRepositoryUrl.set($event)" placeholder="https://github.com/..." />
+        </div>
+        <div class="form-group">
+          <label>Activo</label>
+          <select [ngModel]="formIsActive()" (ngModelChange)="formIsActive.set($event)">
+            <option [ngValue]="true">Sí</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group mt-4">
+        <label>Descripción</label>
+        <textarea rows="4" [ngModel]="formDescription()" (ngModelChange)="formDescription.set($event)" placeholder="Descripción del proyecto"></textarea>
+      </div>
+
+      <!-- Imagen -->
+      <div class="form-group mt-4">
+        <label>Imagen representativa</label>
+        <div class="project-image-section">
+          @if (existingImageUrl() && !removeImage()) {
+            <div class="project-image-preview">
+              <img [src]="existingImageUrl()" alt="Preview" class="project-img" />
+              <button class="btn-sm btn-danger" (click)="removeCurrentImage()">🗑 Quitar</button>
+            </div>
+          } @else if (formImageFile()) {
+            <div class="project-image-preview">
+              <span class="project-img-name">{{ formImageFile()!.name }}</span>
+              <button class="btn-sm btn-danger" (click)="formImageFile.set(null)">🗑 Quitar</button>
+            </div>
+          }
+          <label class="btn-upload">
+            {{ formImageFile() || (existingImageUrl() && !removeImage()) ? '📷 Cambiar imagen' : '📷 Agregar imagen' }}
+            <input type="file" accept="image/*" (change)="onImageSelected($event)" hidden />
+          </label>
+        </div>
+      </div>
+
+      <!-- Stacks multi-select -->
+      <div class="form-group mt-4">
+        <label>Stacks asociados</label>
+        @if (stackOptions().length > 0) {
+          <div class="stacks-grid">
+            @for (stack of stackOptions(); track stack.id) {
+              <div class="stack-chip" [class.stack-chip-selected]="formStackIds().includes(stack.id)"
+                (click)="toggleStack(stack.id)">
+                <span>{{ stack.summary }}</span>
+                @if (formStackIds().includes(stack.id)) { <span class="stack-check">✓</span> }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-gray-400 text-sm">No hay stacks disponibles. Crea stacks primero.</p>
+        }
+      </div>
+
+      <!-- Acciones -->
+      <div class="form-actions mt-4">
+        <button class="btn-save" (click)="save()" [disabled]="formSaving()">
+          {{ formSaving() ? 'Guardando...' : (editingId() !== null ? 'Actualizar Proyecto' : 'Crear Proyecto') }}
+        </button>
+        <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de proyectos -->
+  @if (loading()) {
+    <p class="text-gray-400 mt-4">Cargando proyectos...</p>
+  } @else if (error()) {
+    <p class="text-red-400 mt-4">{{ error() }}</p>
+  } @else {
+    <div class="project-list mt-4">
+      @for (project of projects(); track project.id) {
+        <div class="project-item" [class.project-inactive]="!project.isActive">
+          <div class="project-header">
+            <div class="project-info">
+              <span class="project-title">{{ project.title }}</span>
+              <span class="project-type">{{ project.type }}</span>
+              @if (project.stacks.length > 0) {
+                <span class="project-stacks-badge">{{ project.stacks.length }} stack(s)</span>
+              }
+            </div>
+            <div class="project-dates text-sm" style="color: rgba(255,255,255,0.5);">
+              {{ project.startDate | date:'shortDate' }} - {{ project.endDate | date:'shortDate' }}
+            </div>
+          </div>
+          @if (project.description) {
+            <p class="project-desc">{{ project.description }}</p>
+          }
+          @if (project.stacks.length > 0) {
+            <div class="project-stacks-list">
+              @for (stack of project.stacks; track stack.id) {
+                <span class="stack-badge">{{ stack.summary }}</span>
+              }
+            </div>
+          }
+          <div class="project-actions">
+            <button class="btn-sm" (click)="openEdit(project)">Editar</button>
+            <button class="btn-sm btn-danger" (click)="deleteProject(project)">Eliminar</button>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-gray-400">No hay proyectos aún. Crea el primero.</p>
+      }
+    </div>
+  }
+</section>

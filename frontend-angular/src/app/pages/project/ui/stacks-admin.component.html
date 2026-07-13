@@ -1,0 +1,96 @@
+<div class="stacks-section">
+  <div class="section-header">
+    <h3 class="section-subtitle">📦 Stacks Disponibles</h3>
+    @if (!showForm()) {
+      <button class="btn-save text-sm" (click)="openCreate()">+ Nuevo Stack</button>
+    }
+  </div>
+
+  @if (formSaveMsg()) {
+    <p class="save-msg">{{ formSaveMsg() }}</p>
+  }
+
+  <!-- Formulario -->
+  @if (showForm()) {
+    <div class="stack-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Resumen *</label>
+          <input type="text" [ngModel]="formSummary()" (ngModelChange)="formSummary.set($event)" placeholder="Nombre del stack" />
+        </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select [ngModel]="formCategory()" (ngModelChange)="formCategory.set($event)">
+            @for (c of categories; track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Activo</label>
+          <select [ngModel]="formIsActive()" (ngModelChange)="formIsActive.set($event)">
+            <option [ngValue]="true">Sí</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Skills multi-select -->
+      <div class="form-group mt-4">
+        <label>Skills asociadas</label>
+        @if (availableSkills().length > 0) {
+          <div class="skills-grid">
+            @for (skill of availableSkills(); track skill.id) {
+              <div class="skill-chip" [class.skill-chip-selected]="formSkillIds().includes(skill.id)"
+                (click)="toggleSkill(skill.id)">
+                <span>{{ skill.name }}</span>
+                @if (formSkillIds().includes(skill.id)) { <span class="chip-check">✓</span> }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-gray-400 text-sm">No hay skills activas. Crea skills primero.</p>
+        }
+      </div>
+
+      <div class="form-actions mt-4">
+        <button class="btn-save" (click)="save()" [disabled]="formSaving()">
+          {{ formSaving() ? 'Guardando...' : (editingId() !== null ? 'Actualizar Stack' : 'Crear Stack') }}
+        </button>
+        <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  <!-- Lista -->
+  @if (loading()) {
+    <p class="text-gray-400 mt-2">Cargando stacks...</p>
+  } @else if (error()) {
+    <p class="text-red-400 mt-2">{{ error() }}</p>
+  } @else {
+    <div class="stacks-list mt-2">
+      @for (stack of stacks(); track stack.id) {
+        <div class="stack-item" [class.stack-inactive]="!stack.isActive">
+          <div class="stack-main">
+            <span class="stack-summary">{{ stack.summary }}</span>
+            <span class="stack-category">{{ stack.category }}</span>
+            @if (stack.skills.length > 0) {
+              <span class="stack-skills-count">{{ stack.skills.length }} skill(s)</span>
+            }
+          </div>
+          @if (stack.skills.length > 0) {
+            <div class="stack-skills-row">
+              @for (s of stack.skills; track s.id) {
+                <span class="mini-skill-tag">{{ s.name }}</span>
+              }
+            </div>
+          }
+          <div class="stack-actions">
+            <button class="btn-sm" (click)="openEdit(stack)">Editar</button>
+            <button class="btn-sm btn-danger" (click)="deleteStack(stack)">Eliminar</button>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-gray-400 text-sm">No hay stacks aún. Crea el primero.</p>
+      }
+    </div>
+  }
+</div>

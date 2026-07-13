@@ -16,11 +16,28 @@
   text-align: left;
 }
 
-.footer-section h3 {
+.footer-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.footer-logo-link:hover {
+  opacity: 0.8;
+}
+
+.footer-logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.footer-logo-link span {
   font-family: 'Cinzel', 'Playfair Display', serif;
   color: #1F1F1F;
   font-size: 1rem;
-  margin-bottom: 0.75rem;
+  font-weight: bold;
 }
 
 .footer-section p,
