@@ -19,7 +19,7 @@ type AdminSection = 'profile' | 'skills' | 'projects' | 'settings';
   selector: 'app-admin-dashboard',
   standalone: true,
   templateUrl: '../ui/dashboard.component.html',
-  styleUrls: ['../css/dashboard.component.css'],
+  styleUrls: ['../css/dashboard.component.css', '../css/dashboard-responsive.css'],
   imports: [FormsModule, CommonModule, VistaPreviaComponent, ProjectsAdminComponent]
 })
 export class AdminDashboardComponent implements OnInit {
@@ -29,6 +29,16 @@ export class AdminDashboardComponent implements OnInit {
 
   // Navegación
   activeSection = signal<AdminSection>('profile');
+  sidebarOpen = signal(false);
+
+  toggleSidebar(): void {
+    this.sidebarOpen.set(!this.sidebarOpen());
+  }
+
+  selectSection(section: AdminSection): void {
+    this.setSection(section);
+    this.sidebarOpen.set(false);
+  }
   sections: { key: AdminSection; label: string; icon: string }[] = [
     { key: 'profile', label: 'Perfil', icon: '👤' },
     { key: 'skills', label: 'Skills', icon: '⚡' },

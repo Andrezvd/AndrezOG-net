@@ -1,8 +1,9 @@
 /* ── Project Showcase (Pasarela) ── */
 .project-showcase {
-  max-width: 56rem;
+  width: 100%;
+  max-width: 100%;
   margin: 2rem auto 0;
-  padding: 0 1rem;
+  padding: 0;
 }
 
 .showcase-title {
@@ -124,6 +125,7 @@
   line-height: 1.4;
   color: #e2e8f0;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;

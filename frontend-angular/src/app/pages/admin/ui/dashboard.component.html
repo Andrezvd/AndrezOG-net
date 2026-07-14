@@ -1,7 +1,27 @@
 <div class="admin-shell">
+  <!-- ===== SIDEBAR OVERLAY (mobile) ===== -->
+  <div class="sidebar-overlay" [class.open]="sidebarOpen()" (click)="toggleSidebar()"></div>
+
+  <!-- ===== SIDEBAR (mobile) ===== -->
+  <aside class="admin-sidebar" [class.open]="sidebarOpen()">
+    <button class="sidebar-close-btn" (click)="toggleSidebar()">✕</button>
+    <div class="sidebar-header">
+      <h2>Panel Admin</h2>
+      <p>{{ userName() }}</p>
+    </div>
+    <nav class="sidebar-nav">
+      @for (s of sections; track s.key) {
+        <button class="sidebar-nav-item" [class.sidebar-nav-item--active]="activeSection() === s.key" (click)="selectSection(s.key)">
+          <span>{{ s.icon }}</span> {{ s.label }}
+        </button>
+      }
+    </nav>
+  </aside>
+
   <!-- ===== HEADER ===== -->
   <header class="admin-header">
     <div class="header-left">
+      <button class="btn-hamburger" (click)="toggleSidebar()">☰</button>
       <h1 class="header-title">Panel de Administración</h1>
       <p class="header-sub">Bienvenido, Sr. {{ userName() }}</p>
     </div>
@@ -12,8 +32,8 @@
     </div>
   </header>
 
-  <!-- ===== NAV ===== -->
-  <nav class="admin-nav">
+  <!-- ===== NAV (desktop) ===== -->
+  <nav class="admin-nav desktop-nav">
     @for (s of sections; track s.key) {
       <button class="nav-item" [class.nav-item--active]="activeSection() === s.key" (click)="setSection(s.key)">
         <span>{{ s.icon }}</span> {{ s.label }}
